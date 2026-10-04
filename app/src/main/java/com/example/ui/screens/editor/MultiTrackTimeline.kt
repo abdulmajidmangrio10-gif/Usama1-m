@@ -1,6 +1,6 @@
 package com.example.ui.screens.editor
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,22 +9,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Project
-import com.example.model.VideoClip
+import com.example.model.TextOverlay
 import com.example.ui.theme.*
 import java.util.Locale
 
@@ -33,29 +37,34 @@ fun MultiTrackTimeline(
     project: Project,
     currentPlayheadMs: Long,
     selectedClipIndex: Int,
+    selectedTextOverlayId: String?,
     isPlaying: Boolean,
     onTogglePlayPause: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onSelectClip: (Int) -> Unit,
+    onSelectTextOverlay: (String?) -> Unit,
+    onTrimTextOverlay: (String, Long, Long) -> Unit,
+    onDeleteTextOverlay: (String) -> Unit,
     onSplitClip: () -> Unit,
     onDeleteClip: () -> Unit,
     onAddClip: () -> Unit,
     onTrimClip: (Long, Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val totalDurationMs = project.totalDurationMs
+    val totalDurationMs = project.totalDurationMs.coerceAtLeast(1000L)
+
     val playheadFormatted = remember(currentPlayheadMs) {
         val totalSeconds = currentPlayheadMs / 1000f
         val minutes = (totalSeconds / 60).toInt()
         val seconds = totalSeconds % 60
-        String.format(Locale.getDefault(), "%02d:%04.1f", minutes, seconds)
+        String.format(Locale.getDefault(), "%d:%04.1f", minutes, seconds)
     }
 
     val totalFormatted = remember(totalDurationMs) {
         val totalSeconds = totalDurationMs / 1000f
         val minutes = (totalSeconds / 60).toInt()
         val seconds = totalSeconds % 60
-        String.format(Locale.getDefault(), "%02d:%04.1f", minutes, seconds)
+        String.format(Locale.getDefault(), "%d:%04.1f", minutes, seconds)
     }
 
     Column(
@@ -63,15 +72,15 @@ fun MultiTrackTimeline(
             .fillMaxWidth()
             .background(DarkTimelineTrack)
     ) {
-        // 1. Timeline Controls Header
+        // 1. InShot Top Actions Row (Undo, Redo, Play/Pause, Split, Delete, Add)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 14.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Play / Pause + Timestamp
+            // Play / Pause Button with timestamp
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -79,7 +88,7 @@ fun MultiTrackTimeline(
                 IconButton(
                     onClick = onTogglePlayPause,
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(34.dp)
                         .clip(CircleShape)
                         .background(InShotRed)
                         .testTag("timeline_play_pause_btn")
@@ -92,71 +101,69 @@ fun MultiTrackTimeline(
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = playheadFormatted,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                    Text(
-                        text = " / $totalFormatted",
-                        color = TextSecondary,
-                        fontSize = 12.sp
-                    )
-                }
+                Text(
+                    text = "$playheadFormatted / $totalFormatted",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
             }
 
-            // Quick Actions: Split, Delete, Add
+            // Quick Tool Icons
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 IconButton(
                     onClick = onSplitClip,
-                    modifier = Modifier.testTag("timeline_split_quick_btn")
+                    modifier = Modifier.size(32.dp).testTag("timeline_split_quick_btn")
                 ) {
                     Icon(
                         imageVector = Icons.Default.CallSplit,
                         contentDescription = "Split",
                         tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
                 IconButton(
-                    onClick = onDeleteClip,
-                    enabled = project.clips.size > 1,
-                    modifier = Modifier.testTag("timeline_delete_quick_btn")
+                    onClick = {
+                        if (selectedTextOverlayId != null) {
+                            onDeleteTextOverlay(selectedTextOverlayId)
+                        } else {
+                            onDeleteClip()
+                        }
+                    },
+                    modifier = Modifier.size(32.dp).testTag("timeline_delete_quick_btn")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = if (project.clips.size > 1) Color.White else TextMuted,
-                        modifier = Modifier.size(20.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
                 IconButton(
                     onClick = onAddClip,
-                    modifier = Modifier.testTag("timeline_add_clip_quick_btn")
+                    modifier = Modifier.size(32.dp).testTag("timeline_add_clip_quick_btn")
                 ) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = "Add Clip",
                         tint = InShotCyan,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
         }
 
-        // 2. Interactive Multi-Track Canvas & Scrubber
+        // 2. Interactive Timeline Canvas
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(140.dp)
-                .background(DarkBackground)
+                .height(150.dp)
+                .background(Color(0xFF141416))
                 .pointerInput(totalDurationMs) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -169,10 +176,13 @@ fun MultiTrackTimeline(
                 }
         ) {
             val totalWidthPx = constraints.maxWidth.toFloat()
+            val density = LocalDensity.current
+            val totalWidthDp = with(density) { totalWidthPx.toDp() }
+
             val playheadRatio = if (totalDurationMs > 0) {
                 currentPlayheadMs.toFloat() / totalDurationMs
             } else 0f
-            val playheadX = (playheadRatio * totalWidthPx).coerceIn(0f, totalWidthPx)
+            val playheadXDp = totalWidthDp * playheadRatio
 
             Column(
                 modifier = Modifier
@@ -184,24 +194,20 @@ fun MultiTrackTimeline(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Track 1: Text & Sticker Overlays Strip
-                OverlaysTrackStrip(
-                    project = project,
-                    totalDurationMs = totalDurationMs
+                // TRACK 1: InShot Green Text / Element Track (Circled by user!)
+                InShotTextElementsTrack(
+                    textOverlays = project.textOverlays,
+                    selectedId = selectedTextOverlayId,
+                    totalDurationMs = totalDurationMs,
+                    totalWidthDp = totalWidthDp - 16.dp,
+                    onSelect = onSelectTextOverlay,
+                    onTrim = onTrimTextOverlay
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-                // Track 2: Audio & Music Strip
-                AudioTrackStrip(
-                    project = project,
-                    totalDurationMs = totalDurationMs
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Track 3: Video Clips Strip with Trim Selection
-                VideoClipsTrackStrip(
+                // TRACK 2: InShot Video Clips Filmstrip Track
+                InShotVideoFilmstripTrack(
                     project = project,
                     selectedClipIndex = selectedClipIndex,
                     totalDurationMs = totalDurationMs,
@@ -209,29 +215,50 @@ fun MultiTrackTimeline(
                 )
             }
 
-            // Red Playhead Needle Overlay
+            // InShot Signature White Playhead Needle line
             Box(
                 modifier = Modifier
-                    .offset(x = (playheadX - 6f).dp.coerceAtLeast(0.dp))
-                    .width(12.dp)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                // Top playhead marker knob
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .background(InShotRed)
-                )
-                // Vertical needle line
-                Box(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .fillMaxHeight()
-                        .background(InShotRed)
-                )
-            }
+                    .offset(x = (playheadXDp - 1.dp).coerceAtLeast(0.dp))
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(Color.White)
+            )
+
+            // Top Playhead Knob
+            Box(
+                modifier = Modifier
+                    .offset(x = (playheadXDp - 5.dp).coerceAtLeast(0.dp), y = 0.dp)
+                    .size(10.dp)
+                    .clip(RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp))
+                    .background(Color.White)
+            )
+        }
+
+        // 3. Bottom Time Display (Matches user's InShot screenshot: 0:00.0 centered, 0:27.4 on right)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "00:00",
+                color = TextMuted,
+                fontSize = 10.sp
+            )
+            Text(
+                text = playheadFormatted,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = totalFormatted,
+                color = TextMuted,
+                fontSize = 10.sp
+            )
         }
     }
 }
@@ -241,157 +268,165 @@ fun RulerBar(totalDurationMs: Long) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(16.dp),
+            .height(14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         val totalSec = (totalDurationMs / 1000).toInt().coerceAtLeast(1)
         val step = (totalSec / 4).coerceAtLeast(1)
         for (sec in 0..totalSec step step) {
+            val min = sec / 60
+            val s = sec % 60
             Text(
-                text = "${sec}s",
+                text = String.format(Locale.getDefault(), "%02d:%02d", min, s),
                 color = TextMuted,
-                fontSize = 10.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.Medium
             )
         }
     }
 }
 
+/**
+ * InShot Text / Elements Track:
+ * This renders the exact green pill with white [ < ] and [ > ] handles
+ * that the user pointed to in the attached InShot screenshot.
+ */
 @Composable
-fun OverlaysTrackStrip(project: Project, totalDurationMs: Long) {
+fun InShotTextElementsTrack(
+    textOverlays: List<TextOverlay>,
+    selectedId: String?,
+    totalDurationMs: Long,
+    totalWidthDp: androidx.compose.ui.unit.Dp,
+    onSelect: (String?) -> Unit,
+    onTrim: (String, Long, Long) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(18.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(DarkSurfaceVariant.copy(alpha = 0.5f))
+            .height(34.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(Color(0xFF222428))
     ) {
-        // Text overlays
-        project.textOverlays.forEach { textOverlay ->
-            val startWeight = (textOverlay.startOffsetMs.toFloat() / totalDurationMs).coerceIn(0f, 1f)
-            val durWeight = (textOverlay.durationMs.toFloat() / totalDurationMs).coerceIn(0.05f, 1f - startWeight)
+        if (textOverlays.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(fraction = (startWeight + durWeight).coerceAtMost(1f))
-                    .padding(start = (startWeight * 280).dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(if (textOverlay.isAutoCaption) InShotCyan.copy(alpha = 0.85f) else InShotYellow.copy(alpha = 0.8f))
-                    .padding(horizontal = 4.dp),
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Text(
-                    text = if (textOverlay.isAutoCaption) "CC: ${textOverlay.text}" else "T: ${textOverlay.text}",
-                    color = Color.Black,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-            }
-        }
-
-        // Sticker overlays
-        project.stickerOverlays.forEach { sticker ->
-            val startWeight = (sticker.startOffsetMs.toFloat() / totalDurationMs).coerceIn(0f, 1f)
-            val durWeight = (sticker.durationMs.toFloat() / totalDurationMs).coerceIn(0.05f, 1f - startWeight)
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(fraction = (startWeight + durWeight).coerceAtMost(1f))
-                    .padding(start = (startWeight * 280).dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(InShotPurple.copy(alpha = 0.8f))
-                    .padding(horizontal = 4.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Text(
-                    text = sticker.emojiOrIcon,
+                    text = "Text & Quran Ayahs will appear here",
+                    color = TextMuted,
                     fontSize = 10.sp
                 )
             }
-        }
-    }
-}
+        } else {
+            textOverlays.forEach { textOverlay ->
+                val isSelected = selectedId == textOverlay.id
+                val startRatio = (textOverlay.startOffsetMs.toFloat() / totalDurationMs).coerceIn(0f, 1f)
+                val durationRatio = (textOverlay.durationMs.toFloat() / totalDurationMs).coerceIn(0.08f, 1f - startRatio)
 
-@Composable
-fun AudioTrackStrip(project: Project, totalDurationMs: Long) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(20.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(DarkSurfaceVariant.copy(alpha = 0.4f))
-    ) {
-        val audio = project.audioTracks.firstOrNull()
-        if (audio != null) {
-            val startRatio = (audio.startOffsetMs.toFloat() / totalDurationMs).coerceIn(0f, 1f)
-            val durRatio = (audio.durationMs.toFloat() / totalDurationMs).coerceIn(0.1f, 1f)
-            Row(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(fraction = (startRatio + durRatio).coerceAtMost(1f))
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(InShotCyan.copy(alpha = 0.25f))
-                    .border(1.dp, InShotCyan.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MusicNote,
-                    contentDescription = null,
-                    tint = InShotCyan,
-                    modifier = Modifier.size(12.dp)
-                )
-                Text(
-                    text = "${audio.title} - ${audio.artist}",
-                    color = InShotCyan,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1
-                )
-                // Simulated waveform bars
+                val startXDp = totalWidthDp * startRatio
+                val blockWidthDp = (totalWidthDp * durationRatio).coerceAtLeast(54.dp)
+
+                // InShot Green Capsule with white handles
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier
+                        .offset(x = startXDp)
+                        .width(blockWidthDp)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0xFF7CB342)) // InShot signature Element Green
+                        .border(
+                            border = if (isSelected) BorderStroke(1.5.dp, Color.White) else BorderStroke(1.dp, Color(0xFF558B2F)),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .clickable { onSelect(textOverlay.id) }
+                        .testTag("timeline_text_block_${textOverlay.id}"),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    repeat(8) { idx ->
+                    // Left Trim Handle: [ < ]
+                    if (isSelected) {
                         Box(
                             modifier = Modifier
-                                .width(2.dp)
-                                .height((6 + (idx % 4) * 3).dp)
-                                .background(InShotCyan.copy(alpha = 0.7f))
-                        )
+                                .width(16.dp)
+                                .fillMaxHeight()
+                                .background(Color.White)
+                                .pointerInput(textOverlay.id) {
+                                    detectDragGestures { change, dragAmount ->
+                                        change.consume()
+                                        val deltaMs = (dragAmount.x * 20).toLong()
+                                        val newStart = (textOverlay.startOffsetMs + deltaMs).coerceIn(
+                                            0L,
+                                            textOverlay.startOffsetMs + textOverlay.durationMs - 500L
+                                        )
+                                        val newDuration = textOverlay.durationMs - (newStart - textOverlay.startOffsetMs)
+                                        onTrim(textOverlay.id, newStart, newDuration)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronLeft,
+                                contentDescription = "Trim Left",
+                                tint = Color.Black,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+
+                    // Middle Label: Text / Ayah Name
+                    Text(
+                        text = textOverlay.text.replace("\n", " "),
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Right Trim Handle: [ > ]
+                    if (isSelected) {
+                        Box(
+                            modifier = Modifier
+                                .width(16.dp)
+                                .fillMaxHeight()
+                                .background(Color.White)
+                                .pointerInput(textOverlay.id) {
+                                    detectDragGestures { change, dragAmount ->
+                                        change.consume()
+                                        val deltaMs = (dragAmount.x * 20).toLong()
+                                        val newDuration = (textOverlay.durationMs + deltaMs).coerceAtLeast(500L)
+                                        onTrim(textOverlay.id, textOverlay.startOffsetMs, newDuration)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = "Trim Right",
+                                tint = Color.Black,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
                     }
                 }
             }
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.VolumeOff,
-                    contentDescription = null,
-                    tint = TextMuted,
-                    modifier = Modifier.size(12.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "No audio track (Tap Music to add)",
-                    color = TextMuted,
-                    fontSize = 9.sp
-                )
-            }
         }
     }
 }
 
+/**
+ * InShot Video Filmstrip Track:
+ * Displays video clips with realistic filmstrip frames and timestamps (00:00, 00:02, 00:04).
+ */
 @Composable
-fun VideoClipsTrackStrip(
+fun InShotVideoFilmstripTrack(
     project: Project,
     selectedClipIndex: Int,
     totalDurationMs: Long,
@@ -400,7 +435,7 @@ fun VideoClipsTrackStrip(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(54.dp),
         horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         project.clips.forEachIndexed { index, clip ->
@@ -422,79 +457,81 @@ fun VideoClipsTrackStrip(
                         )
                     )
                     .border(
-                        width = if (isSelected) 2.5.dp else 0.dp,
-                        color = if (isSelected) TimelineSelectionHandle else Color.Transparent,
+                        border = if (isSelected) BorderStroke(2.dp, TimelineSelectionHandle) else BorderStroke(0.5.dp, DarkBorder),
                         shape = RoundedCornerShape(6.dp)
                     )
                     .clickable { onSelectClip(index) }
                     .testTag("timeline_clip_$index")
             ) {
-                // InShot yellow trim handles if selected
+                // Filmstrip Frame Dividers (Simulates video thumbnails like InShot)
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(3) {
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .fillMaxHeight(0.6f)
+                                .background(Color.White.copy(alpha = 0.2f))
+                        )
+                    }
+                }
+
+                // Scene Title & Emoji
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(text = clip.sceneIcon, fontSize = 14.sp)
+                    Text(
+                        text = clip.title,
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // InShot Yellow Trim Handles if selected
                 if (isSelected) {
                     // Left Trim Handle (<|)
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterStart)
-                            .width(10.dp)
+                            .width(12.dp)
                             .fillMaxHeight()
                             .background(TimelineSelectionHandle),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("<", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        Icon(
+                            imageVector = Icons.Default.ChevronLeft,
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(12.dp)
+                        )
                     }
 
                     // Right Trim Handle (|>)
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
-                            .width(10.dp)
+                            .width(12.dp)
                             .fillMaxHeight()
                             .background(TimelineSelectionHandle),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(">", color = Color.Black, fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                // Clip content info
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = if (isSelected) 12.dp else 6.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = clip.sceneIcon, fontSize = 12.sp)
-                        Text(
-                            text = clip.title,
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(12.dp)
                         )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "${clipDuration / 1000f}s",
-                            color = Color.White.copy(alpha = 0.9f),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        if (clip.speed != 1.0f) {
-                            Text(
-                                text = "${clip.speed}x",
-                                color = InShotYellow,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
                     }
                 }
             }

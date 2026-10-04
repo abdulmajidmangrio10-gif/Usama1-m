@@ -46,6 +46,7 @@ fun EditorScreen(
     val exportState by viewModel.exportState.collectAsState()
     val canUndo by viewModel.canUndo.collectAsState()
     val canRedo by viewModel.canRedo.collectAsState()
+    val selectedTextOverlayId by viewModel.selectedTextOverlayId.collectAsState()
 
     var showSaveDraftDialog by remember { mutableStateOf(false) }
     var showExportSettingsDialog by remember { mutableStateOf(false) }
@@ -179,20 +180,27 @@ fun EditorScreen(
                 currentPlayheadMs = currentPlayheadMs,
                 selectedClip = selectedClip,
                 isPlaying = isPlaying,
+                selectedTextOverlayId = selectedTextOverlayId,
+                onSelectTextOverlay = { viewModel.selectTextOverlay(it) },
+                onDeleteTextOverlay = { viewModel.removeTextOverlay(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             )
 
-            // 2. Multi-track Timeline Scrubber
+            // 2. Multi-track Timeline Scrubber with InShot Text Elements Track
             MultiTrackTimeline(
                 project = currentProject,
                 currentPlayheadMs = currentPlayheadMs,
                 selectedClipIndex = selectedClipIndex,
+                selectedTextOverlayId = selectedTextOverlayId,
                 isPlaying = isPlaying,
                 onTogglePlayPause = { viewModel.togglePlayPause() },
                 onSeekTo = { viewModel.seekTo(it) },
                 onSelectClip = { viewModel.selectClip(it) },
+                onSelectTextOverlay = { viewModel.selectTextOverlay(it) },
+                onTrimTextOverlay = { id, start, dur -> viewModel.trimTextOverlay(id, start, dur) },
+                onDeleteTextOverlay = { viewModel.removeTextOverlay(it) },
                 onSplitClip = { viewModel.splitClipAtPlayhead() },
                 onDeleteClip = { viewModel.deleteSelectedClip() },
                 onAddClip = {

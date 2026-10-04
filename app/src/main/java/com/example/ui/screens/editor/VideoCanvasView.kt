@@ -1,6 +1,7 @@
 package com.example.ui.screens.editor
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,6 +40,9 @@ fun VideoCanvasView(
     currentPlayheadMs: Long,
     selectedClip: VideoClip?,
     isPlaying: Boolean,
+    selectedTextOverlayId: String? = null,
+    onSelectTextOverlay: (String?) -> Unit = {},
+    onDeleteTextOverlay: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showWatermark by remember { mutableStateOf(true) }
@@ -245,6 +249,8 @@ fun VideoCanvasView(
                         currentPlayheadMs <= (textOverlay.startOffsetMs + textOverlay.durationMs)
                 if (isActive) {
                     val isArabicText = textOverlay.text.any { c -> c in '\u0600'..'\u06FF' || c in '\u0750'..'\u077F' }
+                    val isSelected = selectedTextOverlayId == textOverlay.id
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -255,19 +261,84 @@ fun VideoCanvasView(
                             else -> Alignment.Center
                         }
                     ) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color(textOverlay.bgColorHex),
-                            modifier = Modifier.padding(8.dp)
+                        Box(
+                            modifier = Modifier
+                                .clickable { onSelectTextOverlay(textOverlay.id) }
+                                .padding(if (isSelected) 10.dp else 4.dp)
                         ) {
-                            Text(
-                                text = textOverlay.text,
-                                color = Color(textOverlay.textColorHex),
-                                fontSize = if (isArabicText) (textOverlay.fontSizeSp * 1.15f).sp else textOverlay.fontSizeSp.sp,
-                                fontFamily = if (isArabicText) AmiriFontFamily else androidx.compose.ui.text.font.FontFamily.Default,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = if (isArabicText) 8.dp else 6.dp)
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(textOverlay.bgColorHex),
+                                border = if (isSelected) BorderStroke(1.5.dp, Color.White) else null,
+                                modifier = Modifier.padding(6.dp)
+                            ) {
+                                Text(
+                                    text = textOverlay.text,
+                                    color = Color(textOverlay.textColorHex),
+                                    fontSize = if (isArabicText) (textOverlay.fontSizeSp * 1.15f).sp else textOverlay.fontSizeSp.sp,
+                                    fontFamily = if (isArabicText) AmiriFontFamily else androidx.compose.ui.text.font.FontFamily.Default,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = if (isArabicText) 8.dp else 6.dp)
+                                )
+                            }
+
+                            // InShot bounding box handles (Red X, Edit Pencil, Resize Arrow)
+                            if (isSelected) {
+                                // Top-Left: Red circle with white X (Delete)
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFE53935))
+                                        .border(1.5.dp, Color.White, CircleShape)
+                                        .clickable { onDeleteTextOverlay(textOverlay.id) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Delete",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+
+                                // Top-Right: White circle with Edit Pencil
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White)
+                                        .border(1.dp, Color.Black.copy(alpha = 0.2f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Edit",
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+
+                                // Bottom-Right: White circle with Resize diagonal icon
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White)
+                                        .border(1.dp, Color.Black.copy(alpha = 0.2f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.OpenInFull,
+                                        contentDescription = "Resize",
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

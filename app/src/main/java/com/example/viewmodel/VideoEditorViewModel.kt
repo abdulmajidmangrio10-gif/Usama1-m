@@ -49,6 +49,9 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
     private val _selectedClipIndex = MutableStateFlow(0)
     val selectedClipIndex: StateFlow<Int> = _selectedClipIndex.asStateFlow()
 
+    private val _selectedTextOverlayId = MutableStateFlow<String?>(null)
+    val selectedTextOverlayId: StateFlow<String?> = _selectedTextOverlayId.asStateFlow()
+
     private val _activeTool = MutableStateFlow<EditorTool?>(null)
     val activeTool: StateFlow<EditorTool?> = _activeTool.asStateFlow()
 
@@ -378,8 +381,9 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
     fun addTextOverlay(text: String, colorHex: Long = 0xFFFFFFFF, bgColorHex: Long = 0x88000000) {
         val current = _project.value ?: return
         pushHistory()
+        val newId = "txt_${System.currentTimeMillis()}"
         val newText = TextOverlay(
-            id = "txt_${System.currentTimeMillis()}",
+            id = newId,
             text = text,
             startOffsetMs = _currentPlayheadMs.value,
             durationMs = 3000L,
@@ -387,11 +391,33 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
             bgColorHex = bgColorHex
         )
         _project.value = current.copy(textOverlays = current.textOverlays + newText)
+        _selectedTextOverlayId.value = newId
+    }
+
+    fun selectTextOverlay(id: String?) {
+        _selectedTextOverlayId.value = id
+    }
+
+    fun trimTextOverlay(id: String, newStartMs: Long, newDurationMs: Long) {
+        val current = _project.value ?: return
+        val updated = current.textOverlays.map {
+            if (it.id == id) {
+                it.copy(
+                    startOffsetMs = newStartMs.coerceAtLeast(0L),
+                    durationMs = newDurationMs.coerceAtLeast(400L)
+                )
+            } else it
+        }
+        pushHistory()
+        _project.value = current.copy(textOverlays = updated)
     }
 
     fun removeTextOverlay(id: String) {
         val current = _project.value ?: return
         pushHistory()
+        if (_selectedTextOverlayId.value == id) {
+            _selectedTextOverlayId.value = null
+        }
         _project.value = current.copy(textOverlays = current.textOverlays.filterNot { it.id == id })
     }
 
@@ -594,6 +620,7 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
         _project.value = current.copy(
             textOverlays = current.textOverlays + newOverlays
         )
+        _selectedTextOverlayId.value = newOverlays.firstOrNull()?.id
     }
 
     // --- Save & Export ---
