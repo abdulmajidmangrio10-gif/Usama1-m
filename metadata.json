@@ -1,0 +1,6 @@
+{
+  "name": "InShot Video Editor",
+  "description": "Professional video editor and maker with trim, cut, split, canvas ratios, filters, music, text, stickers, and HD export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
