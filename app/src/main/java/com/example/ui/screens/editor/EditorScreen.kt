@@ -1,6 +1,11 @@
 package com.example.ui.screens.editor
 
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +53,28 @@ fun EditorScreen(
     val canUndo by viewModel.canUndo.collectAsState()
     val canRedo by viewModel.canRedo.collectAsState()
     val selectedTextOverlayId by viewModel.selectedTextOverlayId.collectAsState()
+    val timelineZoom by viewModel.timelineZoom.collectAsState()
+
+    val context = LocalContext.current
+    val addVideoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(context, uri)
+                val durStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                val titleStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+                val durMs = durStr?.toLongOrNull()?.coerceAtLeast(1000L) ?: 8000L
+                val title = if (!titleStr.isNullOrBlank()) titleStr else "Video Clip"
+                viewModel.addClipWithUri(title, uri.toString(), durMs)
+            } catch (_: Exception) {
+                viewModel.addClipWithUri("Video Clip", uri.toString(), 8000L)
+            } finally {
+                try { retriever.release() } catch (_: Exception) {}
+            }
+        }
+    }
 
     var showSaveDraftDialog by remember { mutableStateOf(false) }
     var showExportSettingsDialog by remember { mutableStateOf(false) }
@@ -195,6 +223,9 @@ fun EditorScreen(
                 selectedClipIndex = selectedClipIndex,
                 selectedTextOverlayId = selectedTextOverlayId,
                 isPlaying = isPlaying,
+                zoomLevel = timelineZoom,
+                onZoomIn = { viewModel.zoomInTimeline() },
+                onZoomOut = { viewModel.zoomOutTimeline() },
                 onTogglePlayPause = { viewModel.togglePlayPause() },
                 onSeekTo = { viewModel.seekTo(it) },
                 onSelectClip = { viewModel.selectClip(it) },
@@ -204,7 +235,9 @@ fun EditorScreen(
                 onSplitClip = { viewModel.splitClipAtPlayhead() },
                 onDeleteClip = { viewModel.deleteSelectedClip() },
                 onAddClip = {
-                    viewModel.addClip("New Clip", 4000L, 0xFF00E5FF, 0xFF7C4DFF, "✨")
+                    addVideoPickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                    )
                 },
                 onTrimClip = { start, end -> viewModel.trimClip(start, end) }
             )
@@ -360,6 +393,11 @@ fun EditorScreen(
                     EditorBottomToolStrip(
                         onToolClick = { selected ->
                             when (selected) {
+                                EditorTool.VIDEO -> {
+                                    addVideoPickerLauncher.launch(
+                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
+                                    )
+                                }
                                 EditorTool.SPLIT -> viewModel.splitClipAtPlayhead()
                                 EditorTool.DELETE -> viewModel.deleteSelectedClip()
                                 EditorTool.DUPLICATE -> viewModel.duplicateSelectedClip()

@@ -1,6 +1,6 @@
 {
-  "creator": "Hafiz Abdul Majid Mangrio",
-  "appName": "Quran Video Caption & Editor",
+  "creator": "Hafiz Abdul Majid Mangrew",
+  "appName": "Quran Video Editor",
   "version": "1.0",
   "fonts": [
     { "id": "amiri", "name": "Amiri Classical Quranic", "category": "Arabic", "isRtl": true },

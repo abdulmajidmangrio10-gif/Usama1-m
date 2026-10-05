@@ -61,6 +61,35 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
     private val _autoCaptionState = MutableStateFlow(AutoCaptionGeneratingState())
     val autoCaptionState: StateFlow<AutoCaptionGeneratingState> = _autoCaptionState.asStateFlow()
 
+    private val _timelineZoom = MutableStateFlow(1.0f) // 0.5x to 3.0x
+    val timelineZoom: StateFlow<Float> = _timelineZoom.asStateFlow()
+
+    private val _isFillCanvas = MutableStateFlow(false)
+    val isFillCanvas: StateFlow<Boolean> = _isFillCanvas.asStateFlow()
+
+    private val _editorCustomizationEnabled = MutableStateFlow(false)
+    val editorCustomizationEnabled: StateFlow<Boolean> = _editorCustomizationEnabled.asStateFlow()
+
+    fun zoomInTimeline() {
+        _timelineZoom.value = (_timelineZoom.value + 0.25f).coerceAtMost(3.0f)
+    }
+
+    fun zoomOutTimeline() {
+        _timelineZoom.value = (_timelineZoom.value - 0.25f).coerceAtLeast(0.5f)
+    }
+
+    fun setTimelineZoom(zoom: Float) {
+        _timelineZoom.value = zoom.coerceIn(0.5f, 3.0f)
+    }
+
+    fun toggleFillCanvas() {
+        _isFillCanvas.value = !_isFillCanvas.value
+    }
+
+    fun setEditorCustomizationEnabled(enabled: Boolean) {
+        _editorCustomizationEnabled.value = enabled
+    }
+
     // Undo / Redo history stacks
     private val undoStack = mutableListOf<Project>()
     private val redoStack = mutableListOf<Project>()
@@ -310,6 +339,35 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
             _project.value = current.copy(clips = updated)
             _selectedClipIndex.value = idx + 1
         }
+    }
+
+    fun addClipWithUri(title: String, uriString: String, durationMs: Long) {
+        val current = _project.value ?: return
+        pushHistory()
+        val newClip = VideoClip(
+            id = "clip_${System.currentTimeMillis()}",
+            title = title,
+            durationMs = durationMs.coerceAtLeast(1000L),
+            trimStartMs = 0L,
+            trimEndMs = durationMs.coerceAtLeast(1000L),
+            uriString = uriString,
+            speed = 1.0f,
+            volume = 1.0f,
+            rotationAngle = 0f,
+            isFlippedH = false,
+            isFlippedV = false,
+            filter = FilterType.ORIGINAL,
+            brightness = 0f,
+            contrast = 0f,
+            saturation = 0f,
+            vignette = 0f,
+            themeGradientStart = 0xFF141920,
+            themeGradientEnd = 0xFF0D1217,
+            sceneIcon = "🎬"
+        )
+        val updated = current.clips + newClip
+        _project.value = current.copy(clips = updated)
+        _selectedClipIndex.value = updated.lastIndex
     }
 
     fun addClip(title: String, durationMs: Long = 4000L, gradientStart: Long = 0xFFFF4081, gradientEnd: Long = 0xFF7C4DFF, icon: String = "🎬") {

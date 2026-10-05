@@ -77,7 +77,7 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // TOP HEADER: Official App Logo, Hafiz Abdul Majid Mangrio, Quran Video Editor
+            // TOP HEADER: Official App Logo, Hafiz Abdul Majid Mangrew, Quran Video Editor
             item {
                 Card(
                     shape = RoundedCornerShape(20.dp),
@@ -100,23 +100,51 @@ fun SettingsScreen(
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Quran Video Caption & Editor",
+                            text = "Quran Video Editor",
                             fontWeight = FontWeight.Black,
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Hafiz Abdul Majid Mangrio",
+                            text = "Hafiz Abdul Majid Mangrew",
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
                             color = InShotYellow
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Professional Quran Reels, Subtitles & Video Studio",
+                            text = "Professional Mobile Quran Video Editor",
                             fontSize = 11.sp,
                             color = Color(0xFFB2DFDB)
+                        )
+                    }
+                }
+            }
+
+            // SECTION 1: EDITOR CUSTOMIZATION
+            item {
+                SettingsSection(title = "EDITOR CUSTOMIZATION") {
+                    var enableCustomization by remember { mutableStateOf(false) }
+                    SettingsToggleItem(
+                        icon = Icons.Default.Tune,
+                        title = "Enable Editor Customization",
+                        subtitle = "Customize tool order, visibility and UI layout (OFF by default)",
+                        checked = enableCustomization,
+                        onCheckedChange = { enableCustomization = it }
+                    )
+                    if (enableCustomization) {
+                        SettingsValueItem(
+                            icon = Icons.Default.Reorder,
+                            title = "Feature Placement",
+                            value = "Standard Mobile",
+                            onClick = {}
+                        )
+                        SettingsValueItem(
+                            icon = Icons.Default.Visibility,
+                            title = "Feature Visibility",
+                            value = "All 18 Tools Visible",
+                            onClick = {}
                         )
                     }
                 }
@@ -265,7 +293,7 @@ fun SettingsScreen(
                     SettingsValueItem(
                         icon = Icons.Default.Person,
                         title = "Creator Information",
-                        value = "Hafiz Abdul Majid Mangrio",
+                        value = "Hafiz Abdul Majid Mangrew",
                         onClick = {}
                     )
                 }
@@ -274,7 +302,7 @@ fun SettingsScreen(
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "© 2026 Hafiz Abdul Majid Mangrio. All Rights Reserved.",
+                    text = "© 2026 Hafiz Abdul Majid Mangrew. All Rights Reserved.",
                     color = TextMuted,
                     fontSize = 11.sp,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),

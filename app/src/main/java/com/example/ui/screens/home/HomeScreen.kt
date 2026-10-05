@@ -95,13 +95,13 @@ fun HomeScreen(
                         )
                         Column {
                             Text(
-                                text = "Quran Video Caption & Editor",
+                                text = "Quran Video Editor",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
                                 color = Color.White
                             )
                             Text(
-                                text = "Hafiz Abdul Majid Mangrio",
+                                text = "Hafiz Abdul Majid Mangrew",
                                 fontSize = 11.sp,
                                 color = InShotYellow,
                                 fontWeight = FontWeight.SemiBold

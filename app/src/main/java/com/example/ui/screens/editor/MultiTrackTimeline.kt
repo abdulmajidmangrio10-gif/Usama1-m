@@ -1,6 +1,7 @@
 package com.example.ui.screens.editor
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.example.model.Project
 import com.example.model.TextOverlay
 import com.example.ui.theme.*
+import com.example.util.VideoFrameHelper
 import java.util.Locale
 
 @Composable
@@ -38,6 +43,9 @@ fun MultiTrackTimeline(
     selectedClipIndex: Int,
     selectedTextOverlayId: String?,
     isPlaying: Boolean,
+    zoomLevel: Float = 1.0f,
+    onZoomIn: () -> Unit = {},
+    onZoomOut: () -> Unit = {},
     onTogglePlayPause: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onSelectClip: (Int) -> Unit,
@@ -71,7 +79,7 @@ fun MultiTrackTimeline(
             .fillMaxWidth()
             .background(DarkTimelineTrack)
     ) {
-        // 1. InShot Top Actions Row (Play/Pause, Timecode, Split, Delete, Add)
+        // 1. InShot Top Actions Row (Play/Pause, Timecode, Timeline Zoom, Split, Delete, Add)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -108,11 +116,46 @@ fun MultiTrackTimeline(
                 )
             }
 
-            // Quick Tools
+            // Quick Tools: Zoom -, Zoom +, Split, Delete, Add
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // Zoom Out
+                IconButton(
+                    onClick = onZoomOut,
+                    modifier = Modifier.size(28.dp).testTag("timeline_zoom_out_btn")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ZoomOut,
+                        contentDescription = "Zoom Out",
+                        tint = Color(0xFFCFD8DC),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                Text(
+                    text = String.format(Locale.getDefault(), "%.1fx", zoomLevel),
+                    color = InShotYellow,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Zoom In
+                IconButton(
+                    onClick = onZoomIn,
+                    modifier = Modifier.size(28.dp).testTag("timeline_zoom_in_btn")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ZoomIn,
+                        contentDescription = "Zoom In",
+                        tint = Color(0xFFCFD8DC),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(4.dp))
+
                 IconButton(
                     onClick = onSplitClip,
                     modifier = Modifier.size(32.dp).testTag("timeline_split_quick_btn")
@@ -213,7 +256,8 @@ fun MultiTrackTimeline(
                             project = project,
                             selectedClipIndex = selectedClipIndex,
                             totalDurationMs = totalDurationMs,
-                            onSelectClip = onSelectClip
+                            onSelectClip = onSelectClip,
+                            onTrimClip = onTrimClip
                         )
                     }
 
@@ -520,8 +564,11 @@ fun InShotVideoFilmstripTrack(
     project: Project,
     selectedClipIndex: Int,
     totalDurationMs: Long,
-    onSelectClip: (Int) -> Unit
+    onSelectClip: (Int) -> Unit,
+    onTrimClip: (Long, Long) -> Unit
 ) {
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
         horizontalArrangement = Arrangement.spacedBy(2.dp)
@@ -531,43 +578,126 @@ fun InShotVideoFilmstripTrack(
             val weight = (clipDuration.toFloat() / totalDurationMs).coerceAtLeast(0.08f)
             val isSelected = index == selectedClipIndex
 
+            var frames by remember(clip.uriString, clip.durationMs) {
+                mutableStateOf<List<android.graphics.Bitmap>>(emptyList())
+            }
+            LaunchedEffect(clip.uriString, clip.durationMs) {
+                if (!clip.uriString.isNullOrBlank()) {
+                    frames = VideoFrameHelper.getClipFrames(context, clip.uriString, clip.durationMs, 8)
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .weight(weight)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Color(0xFF263238)) // Neutral slate
+                    .background(Color(0xFF1E222B))
                     .border(
-                        border = if (isSelected) BorderStroke(1.5.dp, InShotYellow) else BorderStroke(0.5.dp, Color(0xFF37474F)),
+                        border = if (isSelected) BorderStroke(2.dp, InShotYellow) else BorderStroke(0.5.dp, Color(0xFF37474F)),
                         shape = RoundedCornerShape(4.dp)
                     )
                     .clickable { onSelectClip(index) }
                     .testTag("timeline_clip_$index")
             ) {
-                // Filmstrip division lines
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(2) {
-                        Box(modifier = Modifier.width(1.dp).fillMaxHeight(0.6f).background(Color.White.copy(alpha = 0.15f)))
+                // Real Video Frame Thumbnails
+                if (frames.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        frames.forEach { bmp ->
+                            Image(
+                                bitmap = bmp.asImageBitmap(),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            )
+                        }
+                    }
+                } else {
+                    // Filmstrip division lines
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(3) {
+                            Box(modifier = Modifier.width(1.dp).fillMaxHeight(0.6f).background(Color.White.copy(alpha = 0.15f)))
+                        }
                     }
                 }
 
-                Row(
-                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                // If selected, Left & Right Trim Handles
+                if (isSelected) {
+                    // Left Trim Handle
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .width(16.dp)
+                            .fillMaxHeight()
+                            .background(InShotYellow)
+                            .pointerInput(clip.id) {
+                                detectDragGestures { change, dragAmount ->
+                                    change.consume()
+                                    val deltaMs = (dragAmount.x * 50).toLong()
+                                    val newTrimStart = (clip.trimStartMs + deltaMs).coerceIn(0L, clip.trimEndMs - 500L)
+                                    onTrimClip(newTrimStart, clip.trimEndMs)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronLeft,
+                            contentDescription = "Trim Left",
+                            tint = Color.Black,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+
+                    // Right Trim Handle
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(16.dp)
+                            .fillMaxHeight()
+                            .background(InShotYellow)
+                            .pointerInput(clip.id) {
+                                detectDragGestures { change, dragAmount ->
+                                    change.consume()
+                                    val deltaMs = (dragAmount.x * 50).toLong()
+                                    val newTrimEnd = (clip.trimEndMs + deltaMs).coerceIn(clip.trimStartMs + 500L, clip.durationMs)
+                                    onTrimClip(clip.trimStartMs, newTrimEnd)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Trim Right",
+                            tint = Color.Black,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+
+                // Title overlay badge
+                Surface(
+                    shape = RoundedCornerShape(3.dp),
+                    color = Color.Black.copy(alpha = 0.7f),
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = if (isSelected) 18.dp else 4.dp, bottom = 2.dp)
                 ) {
-                    Text(text = clip.sceneIcon, fontSize = 11.sp)
                     Text(
                         text = clip.title,
                         color = Color.White,
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                     )
                 }
             }

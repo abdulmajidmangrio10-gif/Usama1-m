@@ -1,6 +1,6 @@
 {
-  "name": "Quran Video Caption & Editor",
-  "description": "Professional Quran Video Caption & Editor by Hafiz Abdul Majid Mangrio featuring complete Quran Ayahs, Arabic Tashkeel, multi-track timeline, and video editing.",
+  "name": "Quran Video Editor",
+  "description": "Professional Quran Video Editor by Hafiz Abdul Majid Mangrew featuring clean mobile workflow, real video timeline, complete Quran Ayahs, and video editing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
