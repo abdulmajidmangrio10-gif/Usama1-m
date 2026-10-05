@@ -79,6 +79,8 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
             _project.value = loaded
             _currentPlayheadMs.value = 0L
             _selectedClipIndex.value = 0
+            _selectedTextOverlayId.value = null
+            _activeTool.value = null
             undoStack.clear()
             redoStack.clear()
             updateUndoRedoStates()
@@ -88,13 +90,18 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
     private fun createFallbackProject(id: Long): Project {
         return Project(
             id = id,
-            title = "New InShot Project",
+            title = "Original Video",
             lastModified = System.currentTimeMillis(),
-            canvasRatio = CanvasRatio.RATIO_9_16,
+            canvasRatio = CanvasRatio.RATIO_ORIGINAL,
+            bgType = CanvasBgType.COLOR,
+            bgColorHex = 0xFF000000,
             clips = listOf(
-                VideoClip("clip_fb_1", "Sunset Intro", 4000L, filter = FilterType.CINEMATIC, sceneIcon = "🌅"),
-                VideoClip("clip_fb_2", "Urban Walk", 4500L, filter = FilterType.VIVID, sceneIcon = "🏙️")
-            )
+                VideoClip("clip_fb_1", "Original Video", 5000L, filter = FilterType.ORIGINAL, sceneIcon = "🎬")
+            ),
+            audioTracks = emptyList(),
+            textOverlays = emptyList(),
+            stickerOverlays = emptyList(),
+            imageOverlays = emptyList()
         )
     }
 

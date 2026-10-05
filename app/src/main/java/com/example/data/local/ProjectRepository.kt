@@ -34,77 +34,28 @@ class ProjectRepository(private val dao: ProjectDao) {
     private suspend fun seedSampleProjects() {
         val project1 = Project(
             id = 0,
-            title = "Surah Ar-Rahman Reel",
+            title = "Original Video Project",
             lastModified = System.currentTimeMillis() - 3600000L * 2,
-            canvasRatio = CanvasRatio.RATIO_9_16,
-            bgType = CanvasBgType.BLUR,
-            bgColorHex = 0xFF04241B,
+            canvasRatio = CanvasRatio.RATIO_ORIGINAL,
+            bgType = CanvasBgType.COLOR,
+            bgColorHex = 0xFF000000,
             clips = listOf(
                 VideoClip(
-                    id = "clip_q1",
-                    title = "Ar-Rahman Opening",
-                    durationMs = 5000L,
+                    id = "clip_clean_1",
+                    title = "Original Video",
+                    durationMs = 8000L,
                     trimStartMs = 0L,
-                    trimEndMs = 5000L,
-                    filter = FilterType.CINEMATIC,
+                    trimEndMs = 8000L,
+                    filter = FilterType.ORIGINAL,
                     speed = 1.0f,
-                    themeGradientStart = 0xFF0D5C3A,
-                    themeGradientEnd = 0xFF042617,
-                    sceneIcon = "🕌"
-                ),
-                VideoClip(
-                    id = "clip_q2",
-                    title = "Celestial Sky",
-                    durationMs = 6000L,
-                    trimStartMs = 0L,
-                    trimEndMs = 6000L,
-                    filter = FilterType.WARM,
-                    speed = 1.0f,
-                    themeGradientStart = 0xFF14532D,
-                    themeGradientEnd = 0xFF064E3B,
-                    sceneIcon = "✨"
+                    themeGradientStart = 0xFF141920,
+                    themeGradientEnd = 0xFF0D1217,
+                    sceneIcon = "🎬"
                 )
             ),
-            audioTracks = listOf(
-                AudioTrack(
-                    id = "audio_1",
-                    title = "Quran Recitation Ambient",
-                    artist = "Hafiz Abdul Majid Mangrio",
-                    durationMs = 11000L,
-                    startOffsetMs = 0L,
-                    volume = 0.9f
-                )
-            ),
-            textOverlays = listOf(
-                TextOverlay(
-                    id = "basmala_init",
-                    text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝",
-                    startOffsetMs = 300L,
-                    durationMs = 3500L,
-                    posX = 0.5f,
-                    posY = 0.25f,
-                    fontSizeSp = 28f,
-                    textColorHex = 0xFFFFD700,
-                    bgColorHex = 0xD000281D,
-                    isBasmala = true
-                ),
-                TextOverlay(
-                    id = "ayah_1",
-                    text = "الرَّحْمَٰنُ ۝ عَلَّمَ الْقُرْآنَ",
-                    startOffsetMs = 3800L,
-                    durationMs = 4000L,
-                    posX = 0.5f,
-                    posY = 0.78f,
-                    fontSizeSp = 25f,
-                    textColorHex = 0xFFFFFFFF,
-                    bgColorHex = 0xDD00392B,
-                    isQuranAyah = true,
-                    isAutoCaption = true
-                )
-            ),
-            stickerOverlays = listOf(
-                StickerOverlay("stk_1", "⭐", 4000L, 3000L, 0.85f, 0.15f, 1.2f)
-            ),
+            audioTracks = emptyList(),
+            textOverlays = emptyList(),
+            stickerOverlays = emptyList(),
             imageOverlays = emptyList()
         )
 

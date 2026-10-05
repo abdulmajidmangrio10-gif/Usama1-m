@@ -233,7 +233,7 @@ fun FilterToolPanel(
                 }
             }
         } else {
-            // Adjustment sliders
+            // Adjustment sliders with neutral 0 default original values
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 AdjustmentSlider(
                     label = "Brightness",
@@ -244,13 +244,13 @@ fun FilterToolPanel(
                 AdjustmentSlider(
                     label = "Contrast",
                     value = contrast,
-                    range = 0.5f..1.8f,
+                    range = -0.5f..0.5f,
                     onValueChange = { onAdjustmentsChanged(brightness, it, saturation, vignette) }
                 )
                 AdjustmentSlider(
                     label = "Saturation",
                     value = saturation,
-                    range = 0f..2.0f,
+                    range = -0.5f..0.5f,
                     onValueChange = { onAdjustmentsChanged(brightness, contrast, it, vignette) }
                 )
                 AdjustmentSlider(
@@ -277,7 +277,8 @@ fun AdjustmentSlider(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(label, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-            Text(String.format(Locale.getDefault(), "%.1f", value), color = InShotCyan, fontSize = 12.sp)
+            val displayValue = if (Math.abs(value) < 0.02f) "0 (Original)" else String.format(Locale.getDefault(), "%+d", (value * 100).toInt())
+            Text(displayValue, color = if (Math.abs(value) < 0.02f) InShotYellow else InShotCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         }
         Slider(
             value = value,

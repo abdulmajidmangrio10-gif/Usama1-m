@@ -1,5 +1,7 @@
 package com.example.ui.screens.editor
 
+import android.net.Uri
+import android.widget.VideoView
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.model.*
 import com.example.ui.theme.*
 import java.util.Locale
@@ -45,20 +48,8 @@ fun VideoCanvasView(
     onDeleteTextOverlay: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var showWatermark by remember { mutableStateOf(true) }
+    var showWatermark by remember { mutableStateOf(false) }
     var canvasScale by remember { mutableStateOf(1.0f) }
-
-    // Dynamic wave animation when video is playing
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 0.98f,
-        targetValue = 1.02f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulseScale"
-    )
 
     val activeClip = remember(project.clips, currentPlayheadMs) {
         var accumulated = 0L
@@ -72,44 +63,54 @@ fun VideoCanvasView(
         selectedClip ?: project.clips.firstOrNull()
     }
 
-    val colorFilter = remember(activeClip?.filter, activeClip?.brightness, activeClip?.contrast) {
-        val matrix = when (activeClip?.filter) {
-            FilterType.BLACK_WHITE -> ColorMatrix().apply { setToSaturation(0f) }
-            FilterType.SEPIA -> ColorMatrix().apply { setToSaturation(0.2f) }
-            FilterType.VIVID -> ColorMatrix().apply { setToSaturation(1.8f) }
-            FilterType.CYBERPUNK -> ColorMatrix(floatArrayOf(
-                1.2f, 0.1f, 0.4f, 0f, 20f,
-                0.0f, 1.0f, 0.6f, 0f, 10f,
-                0.4f, 0.2f, 1.5f, 0f, 30f,
-                0f, 0f, 0f, 1f, 0f
-            ))
-            FilterType.CINEMATIC -> ColorMatrix(floatArrayOf(
-                1.2f, 0f, 0f, 0f, 25f,
-                0f, 1.05f, 0f, 0f, 10f,
-                0f, 0f, 0.85f, 0f, 5f,
-                0f, 0f, 0f, 1f, 0f
-            ))
-            FilterType.WARM -> ColorMatrix(floatArrayOf(
-                1.25f, 0f, 0f, 0f, 20f,
-                0f, 1.15f, 0f, 0f, 15f,
-                0f, 0f, 0.8f, 0f, -10f,
-                0f, 0f, 0f, 1f, 0f
-            ))
-            FilterType.COOL -> ColorMatrix(floatArrayOf(
-                0.85f, 0f, 0f, 0f, -10f,
-                0f, 1.05f, 0f, 0f, 5f,
-                0f, 0f, 1.35f, 0f, 25f,
-                0f, 0f, 0f, 1f, 0f
-            ))
-            FilterType.GLITCH -> ColorMatrix(floatArrayOf(
-                1.4f, 0.2f, 0f, 0f, 30f,
-                0f, 0.9f, 0.1f, 0f, -5f,
-                0.2f, 0.1f, 1.3f, 0f, 35f,
-                0f, 0f, 0f, 1f, 0f
-            ))
-            else -> ColorMatrix()
+    val colorFilter: ColorFilter? = remember(activeClip?.filter, activeClip?.brightness, activeClip?.contrast, activeClip?.saturation) {
+        val filter = activeClip?.filter ?: FilterType.ORIGINAL
+        val brightness = activeClip?.brightness ?: 0f
+        val contrast = activeClip?.contrast ?: 0f
+        val saturation = activeClip?.saturation ?: 0f
+
+        val hasAdjustments = filter != FilterType.ORIGINAL || brightness != 0f || contrast != 0f || saturation != 0f
+        if (!hasAdjustments) {
+            null // 100% ORIGINAL COLORS! NO FILTER, NO EFFECT!
+        } else {
+            val matrix = when (filter) {
+                FilterType.BLACK_WHITE -> ColorMatrix().apply { setToSaturation(0f) }
+                FilterType.SEPIA -> ColorMatrix().apply { setToSaturation(0.2f) }
+                FilterType.VIVID -> ColorMatrix().apply { setToSaturation(1.8f) }
+                FilterType.CYBERPUNK -> ColorMatrix(floatArrayOf(
+                    1.2f, 0.1f, 0.4f, 0f, 20f,
+                    0.0f, 1.0f, 0.6f, 0f, 10f,
+                    0.4f, 0.2f, 1.5f, 0f, 30f,
+                    0f, 0f, 0f, 1f, 0f
+                ))
+                FilterType.CINEMATIC -> ColorMatrix(floatArrayOf(
+                    1.2f, 0f, 0f, 0f, 25f,
+                    0f, 1.05f, 0f, 0f, 10f,
+                    0f, 0f, 0.85f, 0f, 5f,
+                    0f, 0f, 0f, 1f, 0f
+                ))
+                FilterType.WARM -> ColorMatrix(floatArrayOf(
+                    1.25f, 0f, 0f, 0f, 20f,
+                    0f, 1.15f, 0f, 0f, 15f,
+                    0f, 0f, 0.8f, 0f, -10f,
+                    0f, 0f, 0f, 1f, 0f
+                ))
+                FilterType.COOL -> ColorMatrix(floatArrayOf(
+                    0.85f, 0f, 0f, 0f, -10f,
+                    0f, 1.05f, 0f, 0f, 5f,
+                    0f, 0f, 1.35f, 0f, 25f,
+                    0f, 0f, 0f, 1f, 0f
+                ))
+                FilterType.GLITCH -> ColorMatrix(floatArrayOf(
+                    1.4f, 0.2f, 0f, 0f, 30f,
+                    0f, 0.9f, 0.1f, 0f, -5f,
+                    0.2f, 0.1f, 1.3f, 0f, 35f,
+                    0f, 0f, 0f, 1f, 0f
+                ))
+                else -> ColorMatrix()
+            }
+            ColorFilter.colorMatrix(matrix)
         }
-        ColorFilter.colorMatrix(matrix)
     }
 
     Box(
@@ -172,60 +173,89 @@ fun VideoCanvasView(
                 }
             }
 
-            // 2. Video Video Content Layer
+            // 2. Real Original Video Content Layer
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        scaleX = (if (activeClip?.isFlippedH == true) -1f else 1f) * canvasScale * (if (isPlaying) pulseScale else 1f)
-                        scaleY = (if (activeClip?.isFlippedV == true) -1f else 1f) * canvasScale * (if (isPlaying) pulseScale else 1f)
+                        scaleX = (if (activeClip?.isFlippedH == true) -1f else 1f) * canvasScale
+                        scaleY = (if (activeClip?.isFlippedV == true) -1f else 1f) * canvasScale
                         rotationZ = activeClip?.rotationAngle ?: 0f
                     }
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                Color(activeClip?.themeGradientStart ?: 0xFFFF3366),
-                                Color(activeClip?.themeGradientEnd ?: 0xFFFF9900)
-                            )
-                        )
-                    ),
+                    .background(Color.Black),
                 contentAlignment = Alignment.Center
             ) {
-                // Video Clip Scene Content Graphic
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = activeClip?.sceneIcon ?: "🎬",
-                        fontSize = 54.sp
+                if (activeClip?.uriString != null) {
+                    val videoUri = remember(activeClip.uriString) { Uri.parse(activeClip.uriString) }
+                    AndroidView(
+                        factory = { ctx ->
+                            VideoView(ctx).apply {
+                                setVideoURI(videoUri)
+                                setOnPreparedListener { mp ->
+                                    mp.isLooping = true
+                                    try {
+                                        mp.setVolume(activeClip.volume, activeClip.volume)
+                                    } catch (_: Exception) {}
+                                    if (isPlaying) {
+                                        seekTo(currentPlayheadMs.toInt())
+                                        start()
+                                    } else {
+                                        seekTo(currentPlayheadMs.toInt())
+                                    }
+                                }
+                                setOnErrorListener { _, _, _ -> true }
+                            }
+                        },
+                        update = { videoView ->
+                            try {
+                                if (isPlaying) {
+                                    if (!videoView.isPlaying) {
+                                        videoView.seekTo(currentPlayheadMs.toInt())
+                                        videoView.start()
+                                    }
+                                } else {
+                                    if (videoView.isPlaying) {
+                                        videoView.pause()
+                                    }
+                                    val currentPos = videoView.currentPosition
+                                    if (Math.abs(currentPos - currentPlayheadMs.toInt()) > 300) {
+                                        videoView.seekTo(currentPlayheadMs.toInt())
+                                    }
+                                }
+                            } catch (_: Exception) {}
+                        },
+                        modifier = Modifier.fillMaxSize()
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = activeClip?.title ?: "Clip",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        letterSpacing = 1.sp
-                    )
-                    if (activeClip?.filter != FilterType.ORIGINAL) {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color.Black.copy(alpha = 0.5f),
-                            modifier = Modifier.padding(top = 6.dp)
+                } else {
+                    // Clean neutral preview when no media file is selected
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0xFF0F141C)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Movie,
+                                contentDescription = null,
+                                tint = Color(0xFF607D8B),
+                                modifier = Modifier.size(54.dp)
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
                             Text(
-                                text = "Filter: ${activeClip?.filter?.displayName}",
-                                color = InShotYellow,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                text = activeClip?.title ?: "Original Video",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
                         }
                     }
                 }
 
-                // Vignette Shader Edge if set
+                // Vignette Shader Edge if set by user explicitly
                 val vignetteAlpha = activeClip?.vignette ?: 0f
                 if (vignetteAlpha > 0.05f) {
                     Box(

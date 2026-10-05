@@ -38,14 +38,14 @@ data class VideoClip(
     val isFlippedH: Boolean = false,
     val isFlippedV: Boolean = false,
     val filter: FilterType = FilterType.ORIGINAL,
-    val brightness: Float = 0f,       // -1.0 to +1.0
-    val contrast: Float = 1.0f,       // 0.5 to 2.0
-    val saturation: Float = 1.0f,     // 0.0 to 2.0
-    val vignette: Float = 0.0f,       // 0.0 to 1.0
+    val brightness: Float = 0f,       // -0.5 to +0.5, 0f is neutral original
+    val contrast: Float = 0f,         // 0f is neutral original
+    val saturation: Float = 0f,       // 0f is neutral original
+    val vignette: Float = 0.0f,       // 0.0 to 1.0, 0f is neutral original
     val exposure: Float = 0.0f,
     val temperature: Float = 0.0f,
-    val themeGradientStart: Long = 0xFF0D5C3A,
-    val themeGradientEnd: Long = 0xFF042617,
+    val themeGradientStart: Long = 0xFF141920,
+    val themeGradientEnd: Long = 0xFF0D1217,
     val sceneIcon: String = "🎬"
 ) {
     val trimmedDurationMs: Long
@@ -137,9 +137,9 @@ data class Project(
     val id: Long = 0,
     val title: String,
     val lastModified: Long,
-    val canvasRatio: CanvasRatio = CanvasRatio.RATIO_9_16,
-    val bgType: CanvasBgType = CanvasBgType.BLUR,
-    val bgColorHex: Long = 0xFF051C15,
+    val canvasRatio: CanvasRatio = CanvasRatio.RATIO_ORIGINAL,
+    val bgType: CanvasBgType = CanvasBgType.COLOR,
+    val bgColorHex: Long = 0xFF000000,
     val clips: List<VideoClip> = emptyList(),
     val audioTracks: List<AudioTrack> = emptyList(),
     val textOverlays: List<TextOverlay> = emptyList(),

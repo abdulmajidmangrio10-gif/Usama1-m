@@ -249,27 +249,30 @@ fun MultiTrackTimeline(
                         }
                     }
 
-                    // LAYER 4: GENERAL TEXT / SUBTITLE TRACKS
+                    // LAYER 4: GENERAL TEXT / SUBTITLE TRACKS (Shown only if added)
                     val generalTextOverlays = project.textOverlays.filter { !it.isQuranAyah && !it.isBasmala }
-                    TimelineTrackRow(label = "Text", icon = Icons.Default.Title) {
-                        InShotTextElementsTrack(
-                            textOverlays = generalTextOverlays,
-                            selectedId = selectedTextOverlayId,
-                            totalDurationMs = totalDurationMs,
-                            totalWidthDp = trackContentWidthDp,
-                            cardColor = Color(0xFF7CB342), // InShot signature Element Green
-                            placeholderText = if (project.textOverlays.isEmpty()) "Tap Text or Quran to add caption layer" else "Text layer",
-                            onSelect = onSelectTextOverlay,
-                            onTrim = onTrimTextOverlay
-                        )
+                    if (generalTextOverlays.isNotEmpty()) {
+                        TimelineTrackRow(label = "Text", icon = Icons.Default.Title) {
+                            InShotTextElementsTrack(
+                                textOverlays = generalTextOverlays,
+                                selectedId = selectedTextOverlayId,
+                                totalDurationMs = totalDurationMs,
+                                totalWidthDp = trackContentWidthDp,
+                                cardColor = Color(0xFF7CB342),
+                                onSelect = onSelectTextOverlay,
+                                onTrim = onTrimTextOverlay
+                            )
+                        }
                     }
 
-                    // LAYER 5: AUDIO TRACKS
-                    TimelineTrackRow(label = "Audio", icon = Icons.Default.MusicNote) {
-                        InShotAudioTrack(
-                            audioTracks = project.audioTracks,
-                            totalDurationMs = totalDurationMs
-                        )
+                    // LAYER 5: AUDIO TRACKS (Shown only if added)
+                    if (project.audioTracks.isNotEmpty()) {
+                        TimelineTrackRow(label = "Audio", icon = Icons.Default.MusicNote) {
+                            InShotAudioTrack(
+                                audioTracks = project.audioTracks,
+                                totalDurationMs = totalDurationMs
+                            )
+                        }
                     }
 
                     // LAYER 6: IMAGE / PIP TRACKS
