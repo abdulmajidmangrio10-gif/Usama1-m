@@ -354,6 +354,68 @@ class VideoEditorViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    private val _isRecordingVoice = MutableStateFlow(false)
+    val isRecordingVoice: StateFlow<Boolean> = _isRecordingVoice.asStateFlow()
+
+    fun startVoiceRecording() {
+        _isRecordingVoice.value = true
+    }
+
+    fun stopVoiceRecording() {
+        if (!_isRecordingVoice.value) return
+        _isRecordingVoice.value = false
+        val current = _project.value ?: return
+        pushHistory()
+        val newAudio = AudioTrack(
+            id = "voice_${System.currentTimeMillis()}",
+            title = "Voice Recitation",
+            artist = "Microphone",
+            durationMs = 4500L,
+            startOffsetMs = _currentPlayheadMs.value,
+            volume = 1.0f,
+            isVoiceover = true,
+            colorHex = 0xFFFFD700
+        )
+        _project.value = current.copy(audioTracks = current.audioTracks + newAudio)
+    }
+
+    fun addBasmala(style: CaptionStyle = CaptionStyle.ARABIC_GOLD) {
+        val current = _project.value ?: return
+        pushHistory()
+        val newId = "basmala_${System.currentTimeMillis()}"
+        val overlay = TextOverlay(
+            id = newId,
+            text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝",
+            startOffsetMs = _currentPlayheadMs.value,
+            durationMs = 4000L,
+            posX = 0.5f,
+            posY = 0.22f,
+            fontSizeSp = 28f,
+            textColorHex = style.textColorHex,
+            bgColorHex = style.bgColorHex,
+            fontStyle = "Bold",
+            isBasmala = true,
+            hasBackgroundBox = true
+        )
+        _project.value = current.copy(textOverlays = current.textOverlays + overlay)
+        _selectedTextOverlayId.value = newId
+    }
+
+    fun addImageOverlay(uriString: String?, title: String = "Photo Layer") {
+        val current = _project.value ?: return
+        pushHistory()
+        val newImg = ImageOverlay(
+            id = "img_${System.currentTimeMillis()}",
+            uriString = uriString,
+            title = title,
+            startOffsetMs = _currentPlayheadMs.value,
+            durationMs = 4000L,
+            posX = 0.5f,
+            posY = 0.5f
+        )
+        _project.value = current.copy(imageOverlays = current.imageOverlays + newImg)
+    }
+
     // --- Audio Tracks ---
 
     fun addAudioTrack(title: String, artist: String, durationMs: Long = 8000L) {

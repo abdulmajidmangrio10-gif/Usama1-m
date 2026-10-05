@@ -518,6 +518,31 @@ fun TextToolPanel(
             }
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = "FONT CATEGORIES (50+ FONTS)", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(6.dp))
+        val fontCategories = listOf("Arabic", "Urdu", "English", "Calligraphy", "Modern", "Bold", "Elegant")
+        var selectedCategory by remember { mutableStateOf("Arabic") }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            items(fontCategories) { cat ->
+                val isSel = selectedCategory == cat
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (isSel) InShotYellow.copy(alpha = 0.25f) else DarkSurfaceVariant,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isSel) InShotYellow else DarkBorder),
+                    modifier = Modifier.clickable { selectedCategory = cat }
+                ) {
+                    Text(
+                        text = cat,
+                        color = if (isSel) InShotYellow else Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                    )
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(14.dp))
 
         Button(
@@ -527,13 +552,13 @@ fun TextToolPanel(
                     onClose()
                 }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = InShotRed),
+            colors = ButtonDefaults.buttonColors(containerColor = InShotYellow),
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().testTag("add_text_submit_btn")
         ) {
-            Icon(Icons.Default.Add, null)
+            Icon(Icons.Default.Add, null, tint = Color.Black)
             Spacer(modifier = Modifier.width(6.dp))
-            Text("Add to Timeline", fontWeight = FontWeight.Bold)
+            Text("Add to Timeline (ٹائم لائن پر شامل کریں)", color = Color.Black, fontWeight = FontWeight.Bold)
         }
     }
 }

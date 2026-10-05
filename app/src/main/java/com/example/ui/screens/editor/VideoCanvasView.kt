@@ -163,7 +163,7 @@ fun VideoCanvasView(
                             )
                     )
                 }
-                CanvasBgType.SOLID_COLOR -> {
+                CanvasBgType.COLOR -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -369,7 +369,36 @@ fun VideoCanvasView(
                 }
             }
 
-            // 5. InShot Watermark Badge (removable by user)
+            // 5. Image / PIP Overlays
+            project.imageOverlays.forEach { img ->
+                val isActive = currentPlayheadMs >= img.startOffsetMs &&
+                        currentPlayheadMs <= (img.startOffsetMs + img.durationMs)
+                if (isActive) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color.Transparent,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .scale(img.scale)
+                                .rotate(img.rotation)
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = androidx.compose.ui.res.painterResource(id = com.example.R.drawable.ic_quran_editor_official),
+                                contentDescription = "Overlay Image",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 6. Quran Video Editor Watermark Badge (removable by user)
             if (showWatermark) {
                 Surface(
                     shape = RoundedCornerShape(6.dp),
@@ -383,9 +412,9 @@ fun VideoCanvasView(
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            text = "InShot",
-                            color = Color.White.copy(alpha = 0.8f),
-                            fontSize = 11.sp,
+                            text = "Quran Editor",
+                            color = InShotYellow.copy(alpha = 0.9f),
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.width(4.dp))

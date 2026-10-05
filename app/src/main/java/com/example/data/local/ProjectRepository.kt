@@ -34,160 +34,86 @@ class ProjectRepository(private val dao: ProjectDao) {
     private suspend fun seedSampleProjects() {
         val project1 = Project(
             id = 0,
-            title = "Tokyo Neon Reel",
-            lastModified = System.currentTimeMillis() - 3600000L * 3,
+            title = "Surah Ar-Rahman Reel",
+            lastModified = System.currentTimeMillis() - 3600000L * 2,
             canvasRatio = CanvasRatio.RATIO_9_16,
             bgType = CanvasBgType.BLUR,
-            bgColorHex = 0xFF121217,
+            bgColorHex = 0xFF04241B,
             clips = listOf(
                 VideoClip(
-                    id = "clip_1",
-                    title = "City Sunset",
-                    durationMs = 4500L,
-                    trimStartMs = 500L,
-                    trimEndMs = 4200L,
-                    filter = FilterType.WARM,
-                    speed = 1.0f,
-                    themeGradientStart = 0xFFFF5252,
-                    themeGradientEnd = 0xFFFF7A00,
-                    sceneIcon = "🌇"
-                ),
-                VideoClip(
-                    id = "clip_2",
-                    title = "Neon Crossing",
+                    id = "clip_q1",
+                    title = "Ar-Rahman Opening",
                     durationMs = 5000L,
                     trimStartMs = 0L,
-                    trimEndMs = 4800L,
-                    filter = FilterType.CYBERPUNK,
-                    speed = 1.2f,
-                    themeGradientStart = 0xFF7C4DFF,
-                    themeGradientEnd = 0xFF00E5FF,
-                    sceneIcon = "🌃"
+                    trimEndMs = 5000L,
+                    filter = FilterType.CINEMATIC,
+                    speed = 1.0f,
+                    themeGradientStart = 0xFF0D5C3A,
+                    themeGradientEnd = 0xFF042617,
+                    sceneIcon = "🕌"
                 ),
                 VideoClip(
-                    id = "clip_3",
-                    title = "Cyber Beat Drop",
-                    durationMs = 3800L,
-                    trimStartMs = 200L,
-                    trimEndMs = 3600L,
-                    filter = FilterType.GLITCH,
+                    id = "clip_q2",
+                    title = "Celestial Sky",
+                    durationMs = 6000L,
+                    trimStartMs = 0L,
+                    trimEndMs = 6000L,
+                    filter = FilterType.WARM,
                     speed = 1.0f,
-                    themeGradientStart = 0xFFFF007F,
-                    themeGradientEnd = 0xFF7928CA,
-                    sceneIcon = "⚡"
+                    themeGradientStart = 0xFF14532D,
+                    themeGradientEnd = 0xFF064E3B,
+                    sceneIcon = "✨"
                 )
             ),
             audioTracks = listOf(
                 AudioTrack(
                     id = "audio_1",
-                    title = "Midnight Drive",
-                    artist = "InShot Music",
-                    durationMs = 12000L,
+                    title = "Quran Recitation Ambient",
+                    artist = "Hafiz Abdul Majid Mangrio",
+                    durationMs = 11000L,
                     startOffsetMs = 0L,
                     volume = 0.9f
                 )
             ),
             textOverlays = listOf(
                 TextOverlay(
-                    id = "text_1",
-                    text = "NEON NIGHTS 🌙",
-                    startOffsetMs = 800L,
+                    id = "basmala_init",
+                    text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ ۝",
+                    startOffsetMs = 300L,
                     durationMs = 3500L,
                     posX = 0.5f,
                     posY = 0.25f,
-                    fontSizeSp = 26f,
-                    textColorHex = 0xFFFFFFFF,
-                    bgColorHex = 0x88FF2A55
-                )
-            ),
-            stickerOverlays = listOf(
-                StickerOverlay(
-                    id = "sticker_1",
-                    emojiOrIcon = "🔥",
-                    startOffsetMs = 1200L,
-                    durationMs = 3000L,
-                    posX = 0.5f,
-                    posY = 0.72f,
-                    scale = 1.2f
-                )
-            )
-        )
-
-        val project2 = Project(
-            id = 0,
-            title = "Aesthetic Cafe Vlog",
-            lastModified = System.currentTimeMillis() - 86400000L * 1,
-            canvasRatio = CanvasRatio.RATIO_1_1,
-            bgType = CanvasBgType.GRADIENT,
-            bgColorHex = 0xFF1E202A,
-            clips = listOf(
-                VideoClip(
-                    id = "clip_cafe_1",
-                    title = "Pour Over Coffee",
-                    durationMs = 4000L,
-                    trimStartMs = 0L,
-                    trimEndMs = 3800L,
-                    filter = FilterType.VINTAGE,
-                    speed = 0.8f,
-                    themeGradientStart = 0xFF8D6E63,
-                    themeGradientEnd = 0xFFD7CCC8,
-                    sceneIcon = "☕"
+                    fontSizeSp = 28f,
+                    textColorHex = 0xFFFFD700,
+                    bgColorHex = 0xD000281D,
+                    isBasmala = true
                 ),
-                VideoClip(
-                    id = "clip_cafe_2",
-                    title = "Croissant & Morning",
-                    durationMs = 3500L,
-                    trimStartMs = 300L,
-                    trimEndMs = 3300L,
-                    filter = FilterType.WARM,
-                    speed = 1.0f,
-                    themeGradientStart = 0xFFFFB74D,
-                    themeGradientEnd = 0xFFFFE0B2,
-                    sceneIcon = "🥐"
-                )
-            ),
-            audioTracks = listOf(
-                AudioTrack(
-                    id = "audio_cafe",
-                    title = "Lo-Fi Morning Chords",
-                    artist = "Coffee Studio",
-                    durationMs = 8000L,
-                    startOffsetMs = 0L,
-                    volume = 0.7f
-                )
-            ),
-            textOverlays = listOf(
                 TextOverlay(
-                    id = "text_cafe",
-                    text = "Sunday Bliss ✨",
-                    startOffsetMs = 500L,
-                    durationMs = 3200L,
+                    id = "ayah_1",
+                    text = "الرَّحْمَٰنُ ۝ عَلَّمَ الْقُرْآنَ",
+                    startOffsetMs = 3800L,
+                    durationMs = 4000L,
                     posX = 0.5f,
-                    posY = 0.82f,
-                    fontSizeSp = 22f,
+                    posY = 0.78f,
+                    fontSizeSp = 25f,
                     textColorHex = 0xFFFFFFFF,
-                    bgColorHex = 0x994E342E
+                    bgColorHex = 0xDD00392B,
+                    isQuranAyah = true,
+                    isAutoCaption = true
                 )
             ),
             stickerOverlays = listOf(
-                StickerOverlay(
-                    id = "sticker_cafe",
-                    emojiOrIcon = "✨",
-                    startOffsetMs = 400L,
-                    durationMs = 3500L,
-                    posX = 0.8f,
-                    posY = 0.2f,
-                    scale = 1.1f
-                )
-            )
+                StickerOverlay("stk_1", "⭐", 4000L, 3000L, 0.85f, 0.15f, 1.2f)
+            ),
+            imageOverlays = emptyList()
         )
 
-        saveProject(project1)
-        saveProject(project2)
+        dao.insertProject(project1.toEntity())
     }
 
     private fun Project.toEntity(): ProjectEntity {
         val root = JSONObject()
+
         val clipsArr = JSONArray()
         clips.forEach { clip ->
             val cObj = JSONObject()
@@ -196,6 +122,7 @@ class ProjectRepository(private val dao: ProjectDao) {
             cObj.put("durationMs", clip.durationMs)
             cObj.put("trimStartMs", clip.trimStartMs)
             cObj.put("trimEndMs", clip.trimEndMs)
+            if (clip.uriString != null) cObj.put("uriString", clip.uriString)
             cObj.put("speed", clip.speed.toDouble())
             cObj.put("volume", clip.volume.toDouble())
             cObj.put("rotationAngle", clip.rotationAngle.toDouble())
@@ -243,6 +170,9 @@ class ProjectRepository(private val dao: ProjectDao) {
             tObj.put("fontStyle", text.fontStyle)
             tObj.put("hasBackgroundBox", text.hasBackgroundBox)
             tObj.put("isAutoCaption", text.isAutoCaption)
+            tObj.put("isQuranAyah", text.isQuranAyah)
+            tObj.put("isBasmala", text.isBasmala)
+            tObj.put("animationName", text.animationName)
             textArr.put(tObj)
         }
         root.put("texts", textArr)
@@ -262,6 +192,22 @@ class ProjectRepository(private val dao: ProjectDao) {
         }
         root.put("stickers", stickerArr)
 
+        val imageArr = JSONArray()
+        imageOverlays.forEach { img ->
+            val iObj = JSONObject()
+            iObj.put("id", img.id)
+            if (img.uriString != null) iObj.put("uriString", img.uriString)
+            iObj.put("title", img.title)
+            iObj.put("startOffsetMs", img.startOffsetMs)
+            iObj.put("durationMs", img.durationMs)
+            iObj.put("posX", img.posX.toDouble())
+            iObj.put("posY", img.posY.toDouble())
+            iObj.put("scale", img.scale.toDouble())
+            iObj.put("rotation", img.rotation.toDouble())
+            imageArr.put(iObj)
+        }
+        root.put("images", imageArr)
+
         return ProjectEntity(
             id = id,
             title = title,
@@ -280,6 +226,7 @@ class ProjectRepository(private val dao: ProjectDao) {
         val audioList = mutableListOf<AudioTrack>()
         val textList = mutableListOf<TextOverlay>()
         val stickerList = mutableListOf<StickerOverlay>()
+        val imageList = mutableListOf<ImageOverlay>()
 
         try {
             val root = JSONObject(projectJson)
@@ -295,6 +242,7 @@ class ProjectRepository(private val dao: ProjectDao) {
                             durationMs = obj.optLong("durationMs", 3000L),
                             trimStartMs = obj.optLong("trimStartMs", 0L),
                             trimEndMs = obj.optLong("trimEndMs", obj.optLong("durationMs", 3000L)),
+                            uriString = obj.optString("uriString").takeIf { it.isNotBlank() },
                             speed = obj.optDouble("speed", 1.0).toFloat(),
                             volume = obj.optDouble("volume", 1.0).toFloat(),
                             rotationAngle = obj.optDouble("rotationAngle", 0.0).toFloat(),
@@ -309,8 +257,8 @@ class ProjectRepository(private val dao: ProjectDao) {
                             contrast = obj.optDouble("contrast", 1.0).toFloat(),
                             saturation = obj.optDouble("saturation", 1.0).toFloat(),
                             vignette = obj.optDouble("vignette", 0.0).toFloat(),
-                            themeGradientStart = obj.optLong("themeGradientStart", 0xFFFF5252),
-                            themeGradientEnd = obj.optLong("themeGradientEnd", 0xFFFF7A00),
+                            themeGradientStart = obj.optLong("themeGradientStart", 0xFF0D5C3A),
+                            themeGradientEnd = obj.optLong("themeGradientEnd", 0xFF042617),
                             sceneIcon = obj.optString("sceneIcon", "🎬")
                         )
                     )
@@ -325,7 +273,7 @@ class ProjectRepository(private val dao: ProjectDao) {
                         AudioTrack(
                             id = obj.optString("id", "audio_$i"),
                             title = obj.optString("title", "Track $i"),
-                            artist = obj.optString("artist", "InShot"),
+                            artist = obj.optString("artist", "Quran Editor"),
                             durationMs = obj.optLong("durationMs", 5000L),
                             startOffsetMs = obj.optLong("startOffsetMs", 0L),
                             volume = obj.optDouble("volume", 1.0).toFloat(),
@@ -343,9 +291,9 @@ class ProjectRepository(private val dao: ProjectDao) {
                     textList.add(
                         TextOverlay(
                             id = obj.optString("id", "text_$i"),
-                            text = obj.optString("text", "Text"),
+                            text = obj.optString("text", ""),
                             startOffsetMs = obj.optLong("startOffsetMs", 0L),
-                            durationMs = obj.optLong("durationMs", 2000L),
+                            durationMs = obj.optLong("durationMs", 3000L),
                             posX = obj.optDouble("posX", 0.5).toFloat(),
                             posY = obj.optDouble("posY", 0.5).toFloat(),
                             fontSizeSp = obj.optDouble("fontSizeSp", 24.0).toFloat(),
@@ -353,7 +301,10 @@ class ProjectRepository(private val dao: ProjectDao) {
                             bgColorHex = obj.optLong("bgColorHex", 0xAA000000),
                             fontStyle = obj.optString("fontStyle", "Bold"),
                             hasBackgroundBox = obj.optBoolean("hasBackgroundBox", true),
-                            isAutoCaption = obj.optBoolean("isAutoCaption", false)
+                            isAutoCaption = obj.optBoolean("isAutoCaption", false),
+                            isQuranAyah = obj.optBoolean("isQuranAyah", false),
+                            isBasmala = obj.optBoolean("isBasmala", false),
+                            animationName = obj.optString("animationName", "Fade In")
                         )
                     )
                 }
@@ -366,7 +317,7 @@ class ProjectRepository(private val dao: ProjectDao) {
                     stickerList.add(
                         StickerOverlay(
                             id = obj.optString("id", "sticker_$i"),
-                            emojiOrIcon = obj.optString("emojiOrIcon", "✨"),
+                            emojiOrIcon = obj.optString("emojiOrIcon", "⭐"),
                             startOffsetMs = obj.optLong("startOffsetMs", 0L),
                             durationMs = obj.optLong("durationMs", 2000L),
                             posX = obj.optDouble("posX", 0.5).toFloat(),
@@ -377,8 +328,28 @@ class ProjectRepository(private val dao: ProjectDao) {
                     )
                 }
             }
+
+            if (root.has("images")) {
+                val arr = root.getJSONArray("images")
+                for (i in 0 until arr.length()) {
+                    val obj = arr.getJSONObject(i)
+                    imageList.add(
+                        ImageOverlay(
+                            id = obj.optString("id", "img_$i"),
+                            uriString = obj.optString("uriString").takeIf { it.isNotBlank() },
+                            title = obj.optString("title", "Image $i"),
+                            startOffsetMs = obj.optLong("startOffsetMs", 0L),
+                            durationMs = obj.optLong("durationMs", 4000L),
+                            posX = obj.optDouble("posX", 0.5).toFloat(),
+                            posY = obj.optDouble("posY", 0.5).toFloat(),
+                            scale = obj.optDouble("scale", 1.0).toFloat(),
+                            rotation = obj.optDouble("rotation", 0.0).toFloat()
+                        )
+                    )
+                }
+            }
         } catch (_: Exception) {
-            // fallback gracefully
+            // Fallback default
         }
 
         return Project(
@@ -396,10 +367,19 @@ class ProjectRepository(private val dao: ProjectDao) {
                 CanvasBgType.BLUR
             },
             bgColorHex = bgColorHex,
-            clips = clipsList,
+            clips = if (clipsList.isNotEmpty()) clipsList else listOf(
+                VideoClip(
+                    id = "def_clip",
+                    title = title,
+                    durationMs = durationMs.coerceAtLeast(3000L),
+                    themeGradientStart = 0xFF0D5C3A,
+                    themeGradientEnd = 0xFF042617
+                )
+            ),
             audioTracks = audioList,
             textOverlays = textList,
-            stickerOverlays = stickerList
+            stickerOverlays = stickerList,
+            imageOverlays = imageList
         )
     }
 }

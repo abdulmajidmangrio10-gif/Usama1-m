@@ -1,7 +1,7 @@
 package com.example.model
 
 enum class CanvasRatio(val label: String, val ratioWidth: Float, val ratioHeight: Float, val subtitle: String) {
-    RATIO_9_16("9:16", 9f, 16f, "TikTok / Reels"),
+    RATIO_9_16("9:16", 9f, 16f, "Reels / TikTok"),
     RATIO_1_1("1:1", 1f, 1f, "Instagram"),
     RATIO_16_9("16:9", 16f, 9f, "YouTube"),
     RATIO_4_5("4:5", 4f, 5f, "Feed Post"),
@@ -15,13 +15,13 @@ enum class CanvasRatio(val label: String, val ratioWidth: Float, val ratioHeight
 enum class FilterType(val displayName: String, val description: String) {
     ORIGINAL("Original", "Natural colors"),
     CINEMATIC("Cinema", "Moody teal & orange"),
-    VINTAGE("Vintage", "90s warm analog film"),
-    CYBERPUNK("Cyberpunk", "Vivid neon & violet"),
-    BLACK_WHITE("Noir B&W", "High contrast monochrome"),
     WARM("Golden", "Warm sunset glow"),
-    VIVID("Vivid Pop", "Boosted vibrant saturation"),
-    GLITCH("Glitch Art", "RGB split & edge grain"),
+    VINTAGE("Vintage", "90s warm analog film"),
+    BLACK_WHITE("Noir B&W", "High contrast monochrome"),
     COOL("Ice Cool", "Arctic blue chill"),
+    VIVID("Vivid Pop", "Boosted vibrant saturation"),
+    CYBERPUNK("Cyberpunk", "Vivid neon & violet"),
+    GLITCH("Glitch Art", "RGB split & edge grain"),
     SEPIA("Sepia", "Antique nostalgia")
 }
 
@@ -31,6 +31,7 @@ data class VideoClip(
     val durationMs: Long,
     val trimStartMs: Long = 0L,
     val trimEndMs: Long = durationMs,
+    val uriString: String? = null,
     val speed: Float = 1.0f,
     val volume: Float = 1.0f,
     val rotationAngle: Float = 0f,
@@ -41,8 +42,10 @@ data class VideoClip(
     val contrast: Float = 1.0f,       // 0.5 to 2.0
     val saturation: Float = 1.0f,     // 0.0 to 2.0
     val vignette: Float = 0.0f,       // 0.0 to 1.0
-    val themeGradientStart: Long = 0xFFFF5252,
-    val themeGradientEnd: Long = 0xFFFF7A00,
+    val exposure: Float = 0.0f,
+    val temperature: Float = 0.0f,
+    val themeGradientStart: Long = 0xFF0D5C3A,
+    val themeGradientEnd: Long = 0xFF042617,
     val sceneIcon: String = "🎬"
 ) {
     val trimmedDurationMs: Long
@@ -71,8 +74,29 @@ data class TextOverlay(
     val textColorHex: Long = 0xFFFFFFFF,
     val bgColorHex: Long = 0xAA000000,
     val fontStyle: String = "Bold",
+    val fontFamilyId: String = "amiri",
     val hasBackgroundBox: Boolean = true,
-    val isAutoCaption: Boolean = false
+    val isAutoCaption: Boolean = false,
+    val isQuranAyah: Boolean = false,
+    val isBasmala: Boolean = false,
+    val outlineEnabled: Boolean = false,
+    val outlineColorHex: Long = 0xFF000000,
+    val shadowEnabled: Boolean = false,
+    val shadowColorHex: Long = 0xAA000000,
+    val animationName: String = "Fade In"
+)
+
+data class ImageOverlay(
+    val id: String,
+    val uriString: String? = null,
+    val drawableResName: String = "ic_quran_editor_logo",
+    val title: String = "Image Overlay",
+    val startOffsetMs: Long = 0L,
+    val durationMs: Long = 4000L,
+    val posX: Float = 0.5f,
+    val posY: Float = 0.5f,
+    val scale: Float = 1.0f,
+    val rotation: Float = 0f
 )
 
 enum class CaptionStyle(
@@ -83,13 +107,19 @@ enum class CaptionStyle(
     val fontSizeSp: Float,
     val sampleText: String
 ) {
-    VIRAL_YELLOW("Viral Yellow", 0xFFFFD600L, 0xEE000000L, true, 24f, "🔥 VIRAL HIGHLIGHT"),
-    KARAOKE_POP("Karaoke Pop", 0xFFFFFFFFL, 0xEEFF2A55L, true, 25f, "⚡ POP BOUNCE"),
-    NEON_CYBER("Neon Cyber", 0xFF00E5FFL, 0xEE121217L, true, 22f, "✨ CYBER GLOW"),
-    MINIMAL_WHITE("Minimal Dark", 0xFFFFFFFFL, 0x99000000L, true, 20f, "Subtitles clean"),
-    BOLD_CREATIVE("Bold Outline", 0xFFFF5252L, 0xFFFFFFFFL, true, 23f, "🎯 CREATIVE BOLD"),
-    ARABIC_GOLD("Arabic Gold (ذهب)", 0xFFFFD700L, 0xEE121820L, true, 26f, "بِسْمِ اللَّهِ 🌸"),
-    ARABIC_EMERALD("Emerald (زمرد)", 0xFFE0F2F1L, 0xEE004D40L, true, 26f, "الْحَمْدُ لِلَّهِ ✨")
+    ARABIC_GOLD("Arabic Gold 🌟", 0xFFFFD700, 0xCC002B1E, true, 26f, "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"),
+    ARABIC_EMERALD("Emerald Quran 🌿", 0xFFE0F2F1, 0xDD004D40, true, 25f, "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"),
+    CLEAN_WHITE("Clean White ⚪", 0xFFFFFFFF, 0x00000000, false, 24f, "Subtitles & Captions"),
+    GOLD_OUTLINE("Gold Outline ✨", 0xFFFFD700, 0x00000000, false, 26f, "QURAN REELS"),
+    BLACK_BOX("Black Caption ⬛", 0xFFFFFFFF, 0xCC000000, true, 22f, "High Contrast Subtitle"),
+    YELLOW_POP("Yellow Highlight 🟡", 0xFFFFEA00, 0xCC111111, true, 24f, "Keyword Auto Caption"),
+    MINIMAL_SHADOW("Minimal Shadow 🎬", 0xFFF5F5F5, 0x00000000, false, 24f, "Cinematic Subtitles")
+}
+
+enum class CanvasBgType {
+    BLUR,
+    COLOR,
+    GRADIENT
 }
 
 data class StickerOverlay(
@@ -98,50 +128,48 @@ data class StickerOverlay(
     val startOffsetMs: Long,
     val durationMs: Long,
     val posX: Float = 0.5f,
-    val posY: Float = 0.35f,
+    val posY: Float = 0.5f,
     val scale: Float = 1.0f,
     val rotation: Float = 0f
 )
 
-enum class CanvasBgType {
-    BLUR,
-    GRADIENT,
-    SOLID_COLOR
-}
-
 data class Project(
-    val id: Long,
+    val id: Long = 0,
     val title: String,
     val lastModified: Long,
     val canvasRatio: CanvasRatio = CanvasRatio.RATIO_9_16,
     val bgType: CanvasBgType = CanvasBgType.BLUR,
-    val bgColorHex: Long = 0xFF121217,
+    val bgColorHex: Long = 0xFF051C15,
     val clips: List<VideoClip> = emptyList(),
     val audioTracks: List<AudioTrack> = emptyList(),
     val textOverlays: List<TextOverlay> = emptyList(),
-    val stickerOverlays: List<StickerOverlay> = emptyList()
+    val stickerOverlays: List<StickerOverlay> = emptyList(),
+    val imageOverlays: List<ImageOverlay> = emptyList()
 ) {
     val totalDurationMs: Long
         get() = clips.sumOf { it.trimmedDurationMs }.coerceAtLeast(1000L)
 }
 
 enum class EditorTool(val label: String, val iconName: String) {
+    VIDEO("Video", "movie"),
     CANVAS("Canvas", "aspect_ratio"),
-    MUSIC("Music", "music_note"),
     QURAN("Quran", "menu_book"),
-    AUTO_TEXT("Auto Text", "closed_caption"),
-    STICKER("Sticker", "emoji_emotions"),
+    BASMALA("Basmala", "auto_awesome"),
     TEXT("Text", "title"),
+    AUTO_TEXT("Captions", "closed_caption"),
+    AUDIO("Audio", "music_note"),
+    MUSIC("Music", "music_note"),
+    VOICE("Voice", "mic"),
+    IMAGE("Image", "image"),
     FILTER("Filter", "auto_fix_high"),
-    PIP("PIP", "picture_in_picture"),
-    PRECUT("Precut", "content_cut"),
-    SPLIT("Split", "call_split"),
-    DELETE("Delete", "delete"),
+    ADJUST("Adjust", "tune"),
     SPEED("Speed", "speed"),
-    CROP("Crop", "crop"),
     VOLUME("Volume", "volume_up"),
     ROTATE("Rotate", "rotate_right"),
     FLIP("Flip", "flip"),
     DUPLICATE("Duplicate", "content_copy"),
-    REVERSE("Reverse", "fast_rewind")
+    STICKER("Sticker", "emoji_emotions"),
+    TRIM("Trim", "content_cut"),
+    SPLIT("Split", "call_split"),
+    DELETE("Delete", "delete")
 }

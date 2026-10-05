@@ -1,5 +1,6 @@
 package com.example.ui.screens.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,13 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,11 +31,13 @@ import com.example.ui.theme.*
 fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
-    var defaultResolution by remember { mutableStateOf("1080p") }
-    var defaultFps by remember { mutableStateOf("30 FPS") }
-    var removeWatermarkFree by remember { mutableStateOf(true) }
-    var hardwareAcceleration by remember { mutableStateOf(true) }
-    var showClearedToast by remember { mutableStateOf(false) }
+    var defaultCanvas by remember { mutableStateOf("9:16 (Reels/TikTok)") }
+    var defaultTextStyle by remember { mutableStateOf("Arabic Gold 🌟") }
+    var quranFont by remember { mutableStateOf("Amiri Classical Quranic") }
+    var urduFont by remember { mutableStateOf("Jameel Noori Nastaliq") }
+    var exportQuality by remember { mutableStateOf("1080p (Full HD)") }
+    var exportFps by remember { mutableStateOf("30 FPS") }
+    var isDarkMode by remember { mutableStateOf(true) }
 
     Scaffold(
         containerColor = DarkBackground,
@@ -60,7 +64,7 @@ fun SettingsScreen(
                         text = "Settings",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+                        fontSize = 18.sp
                     )
                 }
             )
@@ -73,238 +77,301 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Pro Membership Card Banner
+            // TOP HEADER: Official App Logo, Hafiz Abdul Majid Mangrio, Quran Video Editor
             item {
                 Card(
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF04241B)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, InShotYellow.copy(alpha = 0.6f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(InShotRed, InShotOrange)
-                                )
-                            )
-                            .padding(20.dp)
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(Icons.Default.WorkspacePremium, null, tint = Color.White)
-                                    Text(
-                                        text = "InShot PRO",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 18.sp
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "All filters, 4K export & no ads unlocked",
-                                    color = Color.White.copy(alpha = 0.9f),
-                                    fontSize = 12.sp
-                                )
-                            }
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = Color.White
-                            ) {
-                                Text(
-                                    text = "Active",
-                                    color = InShotRed,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Section: Video Export Settings
-            item {
-                Text(
-                    text = "VIDEO SETTINGS",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-            }
-
-            item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = DarkSurface)
-                ) {
-                    Column {
-                        SettingItem(
-                            title = "Default Output Resolution",
-                            subtitle = defaultResolution,
-                            icon = Icons.Outlined.HighQuality
-                        ) {
-                            defaultResolution = when (defaultResolution) {
-                                "720p" -> "1080p"
-                                "1080p" -> "4K"
-                                else -> "720p"
-                            }
-                        }
-                        HorizontalDivider(color = DarkBorder)
-                        SettingItem(
-                            title = "Default Frame Rate",
-                            subtitle = defaultFps,
-                            icon = Icons.Outlined.Speed
-                        ) {
-                            defaultFps = if (defaultFps == "30 FPS") "60 FPS" else "30 FPS"
-                        }
-                        HorizontalDivider(color = DarkBorder)
-                        SettingSwitchItem(
-                            title = "Hardware Acceleration",
-                            subtitle = "Speed up video encoding using GPU",
-                            icon = Icons.Outlined.Memory,
-                            checked = hardwareAcceleration,
-                            onCheckedChange = { hardwareAcceleration = it }
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_quran_editor_official),
+                            contentDescription = "Official Logo",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(18.dp))
                         )
-                        HorizontalDivider(color = DarkBorder)
-                        SettingSwitchItem(
-                            title = "Watermark",
-                            subtitle = "Allow one-tap watermark removal",
-                            icon = Icons.Outlined.BrandingWatermark,
-                            checked = removeWatermarkFree,
-                            onCheckedChange = { removeWatermarkFree = it }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "Quran Video Caption & Editor",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 18.sp,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Hafiz Abdul Majid Mangrio",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            color = InShotYellow
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Professional Quran Reels, Subtitles & Video Studio",
+                            fontSize = 11.sp,
+                            color = Color(0xFFB2DFDB)
                         )
                     }
                 }
             }
 
-            // Section: Storage & Cache
+            // SECTION 1: EDITING
             item {
-                Text(
-                    text = "STORAGE & CACHE",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-            }
-
-            item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = DarkSurface)
-                ) {
-                    SettingItem(
-                        title = "Clear Cache",
-                        subtitle = if (showClearedToast) "Cache cleared! (0 MB)" else "Temporary proxy files: 124.6 MB",
-                        icon = Icons.Outlined.CleaningServices
-                    ) {
-                        showClearedToast = true
-                    }
+                SettingsSection(title = "EDITING") {
+                    SettingsValueItem(
+                        icon = Icons.Default.AspectRatio,
+                        title = "Default Canvas",
+                        value = defaultCanvas,
+                        onClick = {
+                            defaultCanvas = if (defaultCanvas.contains("9:16")) "16:9 (YouTube)" else "9:16 (Reels/TikTok)"
+                        }
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Title,
+                        title = "Default Text Style",
+                        value = defaultTextStyle,
+                        onClick = {
+                            defaultTextStyle = if (defaultTextStyle.contains("Gold")) "Clean White ⚪" else "Arabic Gold 🌟"
+                        }
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.MenuBook,
+                        title = "Quran Font",
+                        value = quranFont,
+                        onClick = {
+                            quranFont = if (quranFont.contains("Amiri")) "Uthman Taha Script" else "Amiri Classical Quranic"
+                        }
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Translate,
+                        title = "Urdu Font",
+                        value = urduFont,
+                        onClick = {
+                            urduFont = if (urduFont.contains("Jameel")) "Alvi Nastaleeq" else "Jameel Noori Nastaliq"
+                        }
+                    )
                 }
             }
 
-            // Section: About
+            // SECTION 2: VIDEO
             item {
-                Text(
-                    text = "ABOUT",
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
+                SettingsSection(title = "VIDEO") {
+                    SettingsValueItem(
+                        icon = Icons.Default.HighQuality,
+                        title = "Export Quality",
+                        value = exportQuality,
+                        onClick = {
+                            exportQuality = when (exportQuality) {
+                                "1080p (Full HD)" -> "4K (Ultra HD)"
+                                "4K (Ultra HD)" -> "720p (HD)"
+                                else -> "1080p (Full HD)"
+                            }
+                        }
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Speed,
+                        title = "FPS",
+                        value = exportFps,
+                        onClick = {
+                            exportFps = if (exportFps == "30 FPS") "60 FPS" else "30 FPS"
+                        }
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.VolumeUp,
+                        title = "Default Video Volume",
+                        value = "100%",
+                        onClick = {}
+                    )
+                }
             }
 
+            // SECTION 3: AUDIO
             item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = DarkSurface)
-                ) {
-                    Column {
-                        SettingItem(
-                            title = "InShot Version",
-                            subtitle = "v2.0.4 • Studio Engine",
-                            icon = Icons.Outlined.Info
-                        ) {}
-                        HorizontalDivider(color = DarkBorder)
-                        SettingItem(
-                            title = "Terms of Service & Privacy",
-                            subtitle = "Google Play Policy compliant",
-                            icon = Icons.Outlined.Policy
-                        ) {}
-                    }
+                SettingsSection(title = "AUDIO") {
+                    SettingsValueItem(
+                        icon = Icons.Default.MusicNote,
+                        title = "Audio Volume",
+                        value = "85%",
+                        onClick = {}
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.VolumeMute,
+                        title = "Original Video Audio",
+                        value = "Enabled",
+                        onClick = {}
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Mic,
+                        title = "Voice Settings",
+                        value = "Studio Clarity Noise Reduction",
+                        onClick = {}
+                    )
+                }
+            }
+
+            // SECTION 4: APPEARANCE
+            item {
+                SettingsSection(title = "APPEARANCE") {
+                    SettingsToggleItem(
+                        icon = Icons.Default.DarkMode,
+                        title = "Dark Mode",
+                        subtitle = "Professional studio dark theme",
+                        checked = isDarkMode,
+                        onCheckedChange = { isDarkMode = it }
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Palette,
+                        title = "Theme Color",
+                        value = "Islamic Gold & Emerald",
+                        onClick = {}
+                    )
+                }
+            }
+
+            // SECTION 5: STORAGE
+            item {
+                SettingsSection(title = "STORAGE") {
+                    SettingsValueItem(
+                        icon = Icons.Default.Folder,
+                        title = "Save Location",
+                        value = "Movies/QuranVideoEditor",
+                        onClick = {}
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Download,
+                        title = "Export Folder",
+                        value = "DCIM/QuranReels",
+                        onClick = {}
+                    )
+                }
+            }
+
+            // SECTION 6: ABOUT
+            item {
+                SettingsSection(title = "ABOUT") {
+                    SettingsValueItem(
+                        icon = Icons.Default.Info,
+                        title = "App Information",
+                        value = "Version 1.0.0 (Pro Build)",
+                        onClick = {}
+                    )
+                    SettingsValueItem(
+                        icon = Icons.Default.Person,
+                        title = "Creator Information",
+                        value = "Hafiz Abdul Majid Mangrio",
+                        onClick = {}
+                    )
                 }
             }
 
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "© 2026 Hafiz Abdul Majid Mangrio. All Rights Reserved.",
+                    color = TextMuted,
+                    fontSize = 11.sp,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
             }
         }
     }
 }
 
 @Composable
-fun SettingItem(
+private fun SettingsSection(
     title: String,
-    subtitle: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            color = InShotYellow,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+        )
+        Card(
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(containerColor = DarkSurface),
+            border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                content = content
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsValueItem(
     icon: ImageVector,
+    title: String,
+    value: String,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = InShotRed, modifier = Modifier.size(24.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-            Text(subtitle, color = TextSecondary, fontSize = 12.sp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = InShotYellow, modifier = Modifier.size(20.dp))
+            Text(text = title, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
         }
-        Icon(Icons.Default.ChevronRight, null, tint = TextMuted)
+        Text(text = value, color = TextMuted, fontSize = 12.sp)
     }
 }
 
 @Composable
-fun SettingSwitchItem(
+private fun SettingsToggleItem(
+    icon: ImageVector,
     title: String,
     subtitle: String,
-    icon: ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = InShotRed, modifier = Modifier.size(24.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-            Text(subtitle, color = TextSecondary, fontSize = 12.sp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = InShotYellow, modifier = Modifier.size(20.dp))
+            Column {
+                Text(text = title, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                Text(text = subtitle, color = TextMuted, fontSize = 10.sp)
+            }
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = InShotRed,
-                uncheckedThumbColor = TextMuted,
-                uncheckedTrackColor = DarkSurfaceVariant
+                checkedThumbColor = Color.Black,
+                checkedTrackColor = InShotYellow
             )
         )
     }

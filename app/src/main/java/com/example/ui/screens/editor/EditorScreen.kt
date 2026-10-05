@@ -255,6 +255,43 @@ fun EditorScreen(
                                 onClose = { viewModel.setActiveTool(null) }
                             )
                         }
+                        EditorTool.BASMALA -> {
+                            BasmalaToolPanel(
+                                onAddBasmala = { style -> viewModel.addBasmala(style) },
+                                onClose = { viewModel.setActiveTool(null) }
+                            )
+                        }
+                        EditorTool.ADJUST -> {
+                            AdjustToolPanel(
+                                brightness = selectedClip?.brightness ?: 0f,
+                                contrast = selectedClip?.contrast ?: 1f,
+                                saturation = selectedClip?.saturation ?: 1f,
+                                vignette = selectedClip?.vignette ?: 0f,
+                                onAdjustmentsChanged = { b, c, s, v -> viewModel.updateAdjustments(b, c, s, v) },
+                                onClose = { viewModel.setActiveTool(null) }
+                            )
+                        }
+                        EditorTool.AUDIO -> {
+                            MusicToolPanel(
+                                onAddTrack = { title, genre -> viewModel.addAudioTrack(title, genre) },
+                                onClose = { viewModel.setActiveTool(null) }
+                            )
+                        }
+                        EditorTool.VOICE -> {
+                            val isRecordingVoice by viewModel.isRecordingVoice.collectAsState()
+                            VoiceRecordToolPanel(
+                                isRecording = isRecordingVoice,
+                                onStartRecording = { viewModel.startVoiceRecording() },
+                                onStopRecording = { viewModel.stopVoiceRecording() },
+                                onClose = { viewModel.setActiveTool(null) }
+                            )
+                        }
+                        EditorTool.IMAGE -> {
+                            ImagePipToolPanel(
+                                onAddImage = { uri -> viewModel.addImageOverlay(uri) },
+                                onClose = { viewModel.setActiveTool(null) }
+                            )
+                        }
                         EditorTool.AUTO_TEXT -> {
                             val autoCaptionState by viewModel.autoCaptionState.collectAsState()
                             AutoTextToolPanel(
@@ -424,24 +461,26 @@ fun EditorToolItem(
     onClick: () -> Unit
 ) {
     val icon = when (tool) {
+        EditorTool.VIDEO -> Icons.Default.Movie
         EditorTool.CANVAS -> Icons.Default.AspectRatio
-        EditorTool.MUSIC -> Icons.Default.MusicNote
         EditorTool.QURAN -> Icons.Default.MenuBook
-        EditorTool.AUTO_TEXT -> Icons.Default.ClosedCaption
-        EditorTool.STICKER -> Icons.Default.EmojiEmotions
+        EditorTool.BASMALA -> Icons.Default.AutoAwesome
         EditorTool.TEXT -> Icons.Default.Title
+        EditorTool.AUTO_TEXT -> Icons.Default.ClosedCaption
+        EditorTool.AUDIO, EditorTool.MUSIC -> Icons.Default.MusicNote
+        EditorTool.VOICE -> Icons.Default.Mic
+        EditorTool.IMAGE -> Icons.Default.Image
         EditorTool.FILTER -> Icons.Default.AutoFixHigh
-        EditorTool.PIP -> Icons.Default.PictureInPicture
-        EditorTool.PRECUT -> Icons.Default.ContentCut
-        EditorTool.SPLIT -> Icons.Default.CallSplit
-        EditorTool.DELETE -> Icons.Default.Delete
+        EditorTool.ADJUST -> Icons.Default.Tune
         EditorTool.SPEED -> Icons.Default.Speed
-        EditorTool.CROP -> Icons.Default.Crop
         EditorTool.VOLUME -> Icons.Default.VolumeUp
         EditorTool.ROTATE -> Icons.Default.RotateRight
         EditorTool.FLIP -> Icons.Default.Flip
         EditorTool.DUPLICATE -> Icons.Default.ContentCopy
-        EditorTool.REVERSE -> Icons.Default.FastRewind
+        EditorTool.STICKER -> Icons.Default.EmojiEmotions
+        EditorTool.TRIM -> Icons.Default.ContentCut
+        EditorTool.SPLIT -> Icons.Default.CallSplit
+        EditorTool.DELETE -> Icons.Default.Delete
     }
 
     Column(

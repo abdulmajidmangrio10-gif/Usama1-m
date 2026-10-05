@@ -65,8 +65,8 @@ class MainActivity : ComponentActivity() {
                                         editorViewModel.loadProject(projectId)
                                         currentScreen = Screen.Editor(projectId)
                                     },
-                                    onCreateNewProject = { title, ratio, template, onCreated ->
-                                        homeViewModel.createNewProject(title, ratio, template) { newId ->
+                                    onCreateProjectWithMedia = { uri, title, duration, onCreated ->
+                                        homeViewModel.createProjectFromMedia(uri, title, duration) { newId ->
                                             onCreated(newId)
                                         }
                                     },

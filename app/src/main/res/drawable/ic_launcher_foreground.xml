@@ -1,26 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <!-- Camera Body / Outer Frame -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M37,27h34c7.18,0 13,5.82 13,13v28c0,7.18 -5.82,13 -13,13H37c-7.18,0 -13,-5.82 -13,-13V40C24,32.82 29.82,27 37,27z" />
-
-    <!-- Inner Cutout / Lens Circle -->
-    <path
-        android:fillColor="#E10B47"
-        android:pathData="M54,39c8.28,0 15,6.72 15,15s-6.72,15 -15,15s-15,-6.72 -15,-15S45.72,39 54,39z" />
-
-    <!-- Play Icon Inside Lens -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M50,47.5l11,6.5l-11,6.5z" />
-
-    <!-- Lens Accent / Flash Dot -->
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M73,36m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="82dp"
+        android:height="82dp"
+        android:drawable="@drawable/ic_quran_editor_official"
+        android:gravity="center" />
+</layer-list>

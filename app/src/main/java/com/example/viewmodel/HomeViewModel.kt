@@ -49,6 +49,55 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun createProjectFromMedia(
+        uriString: String?,
+        title: String = "Quran Video",
+        durationMs: Long = 10000L,
+        onCreated: (Long) -> Unit
+    ) {
+        viewModelScope.launch {
+            val clip = if (uriString != null) {
+                VideoClip(
+                    id = "clip_${System.currentTimeMillis()}",
+                    title = title,
+                    durationMs = durationMs,
+                    trimEndMs = durationMs,
+                    uriString = uriString,
+                    themeGradientStart = 0xFF0D5C3A,
+                    themeGradientEnd = 0xFF042617,
+                    sceneIcon = "📹"
+                )
+            } else {
+                VideoClip(
+                    id = "clip_${System.currentTimeMillis()}",
+                    title = title,
+                    durationMs = 8000L,
+                    trimEndMs = 8000L,
+                    filter = FilterType.CINEMATIC,
+                    themeGradientStart = 0xFF0D5C3A,
+                    themeGradientEnd = 0xFF042617,
+                    sceneIcon = "🕌"
+                )
+            }
+
+            val newProject = Project(
+                id = 0,
+                title = title,
+                lastModified = System.currentTimeMillis(),
+                canvasRatio = CanvasRatio.RATIO_9_16,
+                bgType = CanvasBgType.BLUR,
+                bgColorHex = 0xFF04241B,
+                clips = listOf(clip),
+                audioTracks = emptyList(),
+                textOverlays = emptyList(),
+                stickerOverlays = emptyList()
+            )
+
+            val newId = repository.saveProject(newProject)
+            onCreated(newId)
+        }
+    }
+
     fun createNewProject(
         title: String = "Untitled Video",
         canvasRatio: CanvasRatio = CanvasRatio.RATIO_9_16,

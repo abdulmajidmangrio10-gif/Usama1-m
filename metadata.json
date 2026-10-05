@@ -1,6 +1,6 @@
 {
-  "name": "InShot Video Editor",
-  "description": "Professional video editor and maker with trim, cut, split, canvas ratios, filters, music, text, stickers, and HD export.",
+  "name": "Quran Video Caption & Editor",
+  "description": "Professional Quran Video Caption & Editor by Hafiz Abdul Majid Mangrio featuring complete Quran Ayahs, Arabic Tashkeel, multi-track timeline, and video editing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

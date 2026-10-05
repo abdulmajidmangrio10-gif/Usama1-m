@@ -1,0 +1,95 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Deep Emerald & Dark Slate Base Disc -->
+    <path
+        android:pathData="M54,4 C26.39,4 4,26.39 4,54 C4,81.61 26.39,104 54,104 C81.61,104 104,81.61 104,54 C104,26.39 81.61,4 54,4 Z"
+        android:fillColor="#06221A"/>
+
+    <!-- Luminous Emerald Ring -->
+    <path
+        android:pathData="M54,8 C28.59,8 8,28.59 8,54 C8,79.41 28.59,100 54,100 C79.41,100 100,79.41 100,54 C100,28.59 79.41,8 54,8 Z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#10B981"
+        android:fillColor="#00000000"/>
+
+    <!-- Islamic Geometric Eight-Point Star Gold Frame -->
+    <path
+        android:pathData="M54,16 L65,27 L80,27 L80,42 L91,54 L80,66 L80,81 L65,81 L54,92 L43,81 L28,81 L28,66 L17,54 L28,42 L28,27 L43,27 Z"
+        android:strokeWidth="1.2"
+        android:strokeColor="#FFD700"
+        android:fillColor="#0A2F24"/>
+
+    <!-- Gold Accent Ring -->
+    <path
+        android:pathData="M54,22 C36.33,22 22,36.33 22,54 C22,71.67 36.33,86 54,86 C71.67,86 86,71.67 86,54 C86,36.33 71.67,22 54,22 Z"
+        android:strokeWidth="1"
+        android:strokeColor="#FFE082"
+        android:fillColor="#00000000"/>
+
+    <!-- The Holy Quran Open Book in Gold -->
+    <!-- Left Page -->
+    <path
+        android:pathData="M52,38 C44,35 34,36 30,38 C29,38.5 28.5,39.5 28.5,41 L28.5,65 C28.5,66 29.5,67 30.5,66.5 C34.5,65 44,64 52,67.5 Z"
+        android:fillColor="#FFD54F"
+        android:strokeWidth="0.8"
+        android:strokeColor="#FFC107"/>
+
+    <!-- Right Page -->
+    <path
+        android:pathData="M56,38 C64,35 74,36 78,38 C79,38.5 79.5,39.5 79.5,41 L79.5,65 C79.5,66 78.5,67 77.5,66.5 C73.5,65 64,64 56,67.5 Z"
+        android:fillColor="#FFE082"
+        android:strokeWidth="0.8"
+        android:strokeColor="#FFC107"/>
+
+    <!-- Book Spine / Rehal Stand Accent -->
+    <path
+        android:pathData="M52,38 L54,39 L56,38 L56,67.5 L54,68.5 L52,67.5 Z"
+        android:fillColor="#FFA000"/>
+
+    <!-- Book Rehal / Stand Base (X Crossed Stand) -->
+    <path
+        android:pathData="M37,68 L54,77 L71,68 L68,72 L54,80 L40,72 Z"
+        android:fillColor="#FFB300"/>
+
+    <!-- Quranic Calligraphy Lines on Pages -->
+    <path
+        android:pathData="M33,43 L48,42 M33,48 L48,47 M33,53 L48,52 M34,58 L47,57"
+        android:strokeWidth="1.2"
+        android:strokeColor="#8D6E63"
+        android:strokeLineCap="round"/>
+
+    <path
+        android:pathData="M60,42 L75,43 M60,47 L75,48 M60,52 L75,53 M61,57 L74,58"
+        android:strokeWidth="1.2"
+        android:strokeColor="#8D6E63"
+        android:strokeLineCap="round"/>
+
+    <!-- Center Video Play Editing Badge with Cyan Glowing Border -->
+    <path
+        android:pathData="M54,43 C48.48,43 44,47.48 44,53 C44,58.52 48.48,63 54,63 C59.52,63 64,58.52 64,53 C64,47.48 59.52,43 54,43 Z"
+        android:fillColor="#021C14"
+        android:strokeWidth="1.5"
+        android:strokeColor="#00E5FF"/>
+
+    <!-- Play Icon Triangle -->
+    <path
+        android:pathData="M51.5,48 L58.5,53 L51.5,58 Z"
+        android:fillColor="#FFD700"/>
+
+    <!-- Caption / Subtitle Waves Indicator at Top -->
+    <path
+        android:pathData="M44,30 C47,28 51,28 54,28 C57,28 61,28 64,30"
+        android:strokeWidth="1.5"
+        android:strokeColor="#00E5FF"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M48,25 C50,24 52,24 54,24 C56,24 58,24 60,25"
+        android:strokeWidth="1.2"
+        android:strokeColor="#FFD700"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"/>
+</vector>
